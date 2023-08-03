@@ -3,19 +3,25 @@
 #include <mfapi.h>
 
 #include <shlwapi.h>
+#include <propvarutil.h>
 
 #include "DXHelper.h"
 
-class VideoPlayer : public IMFAsyncCallback, public IMFSourceReaderCallback {
+class VideoPlayer : public QObject, public IMFAsyncCallback, public IMFSourceReaderCallback {
+  Q_OBJECT
  public:
+  typedef QSharedPointer<VideoPlayer> Ptr;
   VideoPlayer(HWND &hwnd);
   virtual ~VideoPlayer();
   HRESULT Initialize();
 
   // Playback
   void OpenURL(const WCHAR *sURL);
-  /* void Play();
-   void Pause();*/
+   //void Play();
+   void Pause();
+
+   LONGLONG GetDuration();
+   void SetPosition(const qint64 &hnsPosition);
 
   // IUnknown methods
   STDMETHODIMP QueryInterface(REFIID iid, void **ppv) override;
@@ -34,11 +40,19 @@ class VideoPlayer : public IMFAsyncCallback, public IMFSourceReaderCallback {
   HRESULT OnReadSample(HRESULT hr, DWORD dwStreamIndex, DWORD dwStreamFlags,
                        LONGLONG llTimestamp, IMFSample *pSample) override;
 
+  signals:
+  void positionChanged(qint64 position);
  protected:
   ComPtr<IMFSourceReader> m_reader;
   std::unique_ptr<DXHelper> m_dxhelper;
 
   long m_nRefCount;
   HWND m_hwnd;
+
+  bool m_paused = false;
+  DWORD m_videoStreamIndex;
+
+  ComPtr<IMFSample> m_lastSample;
+  LONGLONG m_lastTimestamp;
 
 };

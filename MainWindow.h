@@ -4,6 +4,7 @@
 #include <QTimer>
 #include <QVBoxLayout>
 #include <QtWidgets/QMainWindow>
+#include <QMenuBar>
 #include <memory>
 
 #include "DXHelper.h"
@@ -24,13 +25,16 @@ class MainWindow : public QMainWindow {
   ~MainWindow();
 
  private:
-  void OpenFile();
-  void CreateMenuBar();
-
+  void connectSignalsAndSlots();
  private:
   Ui::MainWindowClass *ui;
+
   std::unique_ptr<DXHelper> m_dxhelper;
-  std::unique_ptr<VideoPlayer> m_videoPlayer;
+  VideoPlayer::Ptr m_videoPlayer;
 
  public slots:
+  void on_actionOpen_file_triggered();
+  void pauseVideo();
+  void updateDurationInfo(const qint64 &currentPosition);
+  void updateSliderPosition(const qint64 &currentPosition);
 };

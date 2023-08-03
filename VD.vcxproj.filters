@@ -51,11 +51,45 @@
     <ClInclude Include="DXHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VideoPlayer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Media Include="SampleVideo25fps.mp4" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icons\folder.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\media-pause.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\media-play.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\media-skip-backward.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\media-skip-forward.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\media-step-backward.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\media-step-forward.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\media-stop.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\menu.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="icons\volume-high.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="VideoPlayer.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
 </Project>

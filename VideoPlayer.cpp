@@ -81,6 +81,46 @@ void VideoPlayer::OpenURL(const WCHAR *sURL) {
   return;
 }
 
+
+void VideoPlayer::Pause() {
+  if (!m_reader || !m_videoStreamIndex) {
+    return;
+  }
+
+  if (m_paused) {
+    m_paused = false;
+    m_reader->ReadSample(m_videoStreamIndex, 0, nullptr, nullptr, nullptr,
+                         nullptr);
+  } else {
+    m_paused = true;
+  }
+}
+
+LONGLONG VideoPlayer::GetDuration() {
+  LONGLONG duration = 0;
+
+  PROPVARIANT var;
+  PropVariantInit(&var);
+
+  HRESULT hr = m_reader->GetPresentationAttribute(MF_SOURCE_READER_MEDIASOURCE,
+                                                  MF_PD_DURATION, &var);
+  if (SUCCEEDED(hr)) {
+    hr = PropVariantToInt64(var, &duration);
+    PropVariantClear(&var);
+  }
+  return duration;
+}
+
+void VideoPlayer::SetPosition(const qint64 &hnsPosition) {
+  PROPVARIANT var;
+  HRESULT hr = InitPropVariantFromInt64(hnsPosition, &var);
+  if (SUCCEEDED(hr)) {
+    hr = m_reader->SetCurrentPosition(GUID_NULL, var);
+    PropVariantClear(&var);
+  }
+  return;
+}
+
 //-----------------------------------------------------------------------------
 // Playback Methods
 //-----------------------------------------------------------------------------
@@ -88,18 +128,21 @@ void VideoPlayer::OpenURL(const WCHAR *sURL) {
 HRESULT VideoPlayer::OnReadSample(HRESULT hr, DWORD dwStreamIndex,
                                   DWORD dwStreamFlags, LONGLONG llTimestamp,
                                   IMFSample *pSample) {
+  if (m_paused) {
+    return S_OK;
+  }
+
   if (dwStreamFlags & MF_SOURCE_READERF_ENDOFSTREAM) {
     OutputDebugStringA("EndOfStream\n");
     return S_OK;
   }
 
-  ComPtr<ID2D1Bitmap> bitmap = m_dxhelper->CreateBitmapFromVideoSample(pSample);
+  m_videoStreamIndex = dwStreamIndex;
 
+  ComPtr<ID2D1Bitmap> bitmap = m_dxhelper->CreateBitmapFromVideoSample(pSample);
   m_dxhelper->RenderBitmapOnWindow(bitmap);
 
-  //// TODO: add delay
-
-  qDebug() << "OnReadSample()";
+  emit positionChanged(llTimestamp);
 
   hr = m_reader->ReadSample(dwStreamIndex, 0, NULL, NULL, NULL, NULL);
 

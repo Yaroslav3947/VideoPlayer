@@ -100,7 +100,7 @@ void DXHelper::RenderBitmapOnWindow(ComPtr<ID2D1Bitmap> pBitmap) {
 
   m_renderTarget->EndDraw();
 
-  m_swapChain->Present(1, 0);
+  m_swapChain->Present(2, 0);
 
   return;
 }
