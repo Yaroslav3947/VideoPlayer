@@ -1,8 +1,14 @@
 #include "VideoPlayer.h"
 
+VideoPlayer::VideoPlayer(HWND &hwnd)
+    : m_hwnd(hwnd), m_nRefCount(1), m_reader(nullptr) {
+  Initialize();
+}
+
 //-----------------------------------------------------------------------------
 // IUnknown Methods
 //-----------------------------------------------------------------------------
+
 STDMETHODIMP VideoPlayer::QueryInterface(REFIID iid, void **ppv) {
   if (ppv == nullptr) {
     return E_POINTER;
@@ -111,7 +117,7 @@ LONGLONG VideoPlayer::GetDuration() {
   return duration;
 }
 
-void VideoPlayer::SetPosition(const qint64 &hnsPosition) {
+void VideoPlayer::SetPosition(const LONGLONG &hnsPosition) {
   PROPVARIANT var;
   HRESULT hr = InitPropVariantFromInt64(hnsPosition, &var);
   if (SUCCEEDED(hr)) {
@@ -149,9 +155,5 @@ HRESULT VideoPlayer::OnReadSample(HRESULT hr, DWORD dwStreamIndex,
   return S_OK;
 }
 
-VideoPlayer::VideoPlayer(HWND &hwnd)
-    : m_hwnd(hwnd), m_nRefCount(1), m_reader(nullptr) {
-  Initialize();
-}
 
 VideoPlayer::~VideoPlayer() { MFShutdown(); }

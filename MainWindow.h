@@ -33,8 +33,9 @@ class MainWindow : public QMainWindow {
   VideoPlayer::Ptr m_videoPlayer;
 
  public slots:
-  void on_actionOpen_file_triggered();
   void pauseVideo();
+  void onSliderMoved(const LONGLONG &value);
+  void on_actionOpen_file_triggered();
   void updateDurationInfo(const qint64 &currentPosition);
   void updateSliderPosition(const qint64 &currentPosition);
 };

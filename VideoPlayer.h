@@ -21,7 +21,7 @@ class VideoPlayer : public QObject, public IMFAsyncCallback, public IMFSourceRea
    void Pause();
 
    LONGLONG GetDuration();
-   void SetPosition(const qint64 &hnsPosition);
+   void SetPosition(const LONGLONG &hnsPosition);
 
   // IUnknown methods
   STDMETHODIMP QueryInterface(REFIID iid, void **ppv) override;
@@ -50,7 +50,7 @@ class VideoPlayer : public QObject, public IMFAsyncCallback, public IMFSourceRea
   HWND m_hwnd;
 
   bool m_paused = false;
-  DWORD m_videoStreamIndex;
+  DWORD m_videoStreamIndex = 0;
 
   ComPtr<IMFSample> m_lastSample;
   LONGLONG m_lastTimestamp;
