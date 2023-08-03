@@ -1,10 +1,13 @@
 #pragma once
 
+#include <QFileDialog>
 #include <QTimer>
+#include <QVBoxLayout>
 #include <QtWidgets/QMainWindow>
 #include <memory>
 
 #include "DXHelper.h"
+#include "VideoPlayer.h"
 #include "ui_MainWindow.h"
 
 QT_BEGIN_NAMESPACE
@@ -21,9 +24,13 @@ class MainWindow : public QMainWindow {
   ~MainWindow();
 
  private:
+  void OpenFile();
+  void CreateMenuBar();
+
+ private:
   Ui::MainWindowClass *ui;
   std::unique_ptr<DXHelper> m_dxhelper;
+  std::unique_ptr<VideoPlayer> m_videoPlayer;
 
  public slots:
-  void RenderFrame() { m_dxhelper->RenderFrame(); }
 };

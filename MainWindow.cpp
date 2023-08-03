@@ -1,10 +1,10 @@
 #include "MainWindow.h"
 
-#include <QVBoxLayout>
-
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent), ui(new Ui::MainWindowClass()) {
   ui->setupUi(this);
+
+  CreateMenuBar();
 
   setWindowTitle("Video Player");
   resize(1920, 1080);
@@ -23,12 +23,32 @@ MainWindow::MainWindow(QWidget* parent)
   renderWidget->setFixedSize(1280, 720);
   layout->addWidget(renderWidget, 0, Qt::AlignCenter);
 
-  m_dxhelper = std::make_unique<DXHelper>(renderWidget);
+  HWND hwnd = reinterpret_cast<HWND>(renderWidget->winId());
 
+  m_videoPlayer = std::make_unique<VideoPlayer>(hwnd);
+}
 
-  QTimer* renderTimer = new QTimer(this);
-  connect(renderTimer, &QTimer::timeout, this, &MainWindow::RenderFrame);
-  renderTimer->start(16);  // 60 FPS
+void MainWindow::OpenFile() {
+  QString filePath = QFileDialog::getOpenFileName(this, tr("Open File"), "",
+                                                  tr("Video Files (*.mp4)"));
+
+  if (!filePath.isEmpty()) {
+    const wchar_t* wFilePath =
+        reinterpret_cast<const wchar_t*>(filePath.utf16());
+    m_videoPlayer->OpenURL(wFilePath);
+  }
+}
+
+void MainWindow::CreateMenuBar() {
+  QMenuBar* menuBar = new QMenuBar(this);
+  setMenuBar(menuBar);
+
+  QMenu* fileMenu = menuBar->addMenu(tr("File"));
+
+  QAction* openAction = new QAction(tr("Open"), this);
+  fileMenu->addAction(openAction);
+
+  connect(openAction, &QAction::triggered, this, &MainWindow::OpenFile);
 }
 
 MainWindow::~MainWindow() { delete ui; }
