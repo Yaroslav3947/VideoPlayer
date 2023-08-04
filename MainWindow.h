@@ -34,7 +34,7 @@ class MainWindow : public QMainWindow {
 
  public slots:
   void pauseVideo();
-  void onSliderMoved(const LONGLONG &value);
+  void onSliderMoved(const int &position);
   void on_actionOpen_file_triggered();
   void updateDurationInfo(const qint64 &currentPosition);
   void updateSliderPosition(const qint64 &currentPosition);

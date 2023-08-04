@@ -87,7 +87,6 @@ void VideoPlayer::OpenURL(const WCHAR *sURL) {
   return;
 }
 
-
 void VideoPlayer::Pause() {
   if (!m_reader || !m_videoStreamIndex) {
     return;
@@ -118,13 +117,16 @@ LONGLONG VideoPlayer::GetDuration() {
 }
 
 void VideoPlayer::SetPosition(const LONGLONG &hnsPosition) {
+  if (!m_reader) return;
+
   PROPVARIANT var;
-  HRESULT hr = InitPropVariantFromInt64(hnsPosition, &var);
-  if (SUCCEEDED(hr)) {
-    hr = m_reader->SetCurrentPosition(GUID_NULL, var);
-    PropVariantClear(&var);
-  }
-  return;
+  PropVariantInit(&var);
+  var.vt = VT_I8;
+  var.hVal.QuadPart = hnsPosition;
+
+  m_reader->SetCurrentPosition(GUID_NULL, var);
+
+  PropVariantClear(&var);
 }
 
 //-----------------------------------------------------------------------------
