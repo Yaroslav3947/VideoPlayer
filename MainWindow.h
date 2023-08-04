@@ -1,10 +1,10 @@
 #pragma once
 
 #include <QFileDialog>
+#include <QMenuBar>
 #include <QTimer>
 #include <QVBoxLayout>
 #include <QtWidgets/QMainWindow>
-#include <QMenuBar>
 #include <memory>
 
 #include "DXHelper.h"
@@ -26,6 +26,7 @@ class MainWindow : public QMainWindow {
 
  private:
   void connectSignalsAndSlots();
+
  private:
   Ui::MainWindowClass *ui;
 

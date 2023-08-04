@@ -18,10 +18,8 @@ void MainWindow::connectSignalsAndSlots() {
   QObject::connect(this->m_videoPlayer.data(), &VideoPlayer::positionChanged,
                    this, &MainWindow::onPositionChanged);
   connect(ui->slider, &QSlider::sliderMoved, this, &MainWindow::onSliderMoved);
-  connect(ui->slider, &QSlider::sliderPressed, this,
-          &MainWindow::onSliderPressed);
-  connect(ui->slider, &QSlider::sliderReleased, this,
-          &MainWindow::onSliderReleased);
+  connect(ui->slider, &QSlider::sliderPressed, this, &MainWindow::onSliderPressed);
+  connect(ui->slider, &QSlider::sliderReleased, this, &MainWindow::onSliderReleased);
   connect(ui->playButton, &QPushButton::clicked, this, &MainWindow::onPlayPauseVideo);
   connect(ui->actionOpen_file, &QAction::triggered, this, &MainWindow::onFileOpen);
 }
