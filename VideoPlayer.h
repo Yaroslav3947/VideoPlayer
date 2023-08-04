@@ -16,12 +16,13 @@ class VideoPlayer : public QObject, public IMFAsyncCallback, public IMFSourceRea
   HRESULT Initialize();
 
   // Playback
+  void PlayPauseVideo();
   void OpenURL(const WCHAR *sURL);
-   //void Play();
-   void Pause();
 
-   LONGLONG GetDuration();
-   void SetPosition(const LONGLONG &hnsPosition);
+  LONGLONG GetDuration();
+  void SetPosition(const LONGLONG &hnsPosition);
+
+  inline bool GetIsPaused() const { return m_isPaused; }
 
   // IUnknown methods
   STDMETHODIMP QueryInterface(REFIID iid, void **ppv) override;
@@ -49,10 +50,7 @@ class VideoPlayer : public QObject, public IMFAsyncCallback, public IMFSourceRea
   long m_nRefCount;
   HWND m_hwnd;
 
-  bool m_paused = false;
+  bool m_isPaused = false;
   DWORD m_videoStreamIndex = 0;
-
-  ComPtr<IMFSample> m_lastSample;
-  LONGLONG m_lastTimestamp;
 
 };

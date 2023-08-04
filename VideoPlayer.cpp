@@ -87,17 +87,17 @@ void VideoPlayer::OpenURL(const WCHAR *sURL) {
   return;
 }
 
-void VideoPlayer::Pause() {
+void VideoPlayer::PlayPauseVideo() {
   if (!m_reader || !m_videoStreamIndex) {
     return;
   }
 
-  if (m_paused) {
-    m_paused = false;
+  if (m_isPaused) {
+    m_isPaused = false;
     m_reader->ReadSample(m_videoStreamIndex, 0, nullptr, nullptr, nullptr,
                          nullptr);
   } else {
-    m_paused = true;
+    m_isPaused = true;
   }
 }
 
@@ -116,13 +116,13 @@ LONGLONG VideoPlayer::GetDuration() {
   return duration;
 }
 
-void VideoPlayer::SetPosition(const LONGLONG &hnsPosition) {
+void VideoPlayer::SetPosition(const LONGLONG &hnsNewPosition) {
   if (!m_reader) return;
 
   PROPVARIANT var;
   PropVariantInit(&var);
   var.vt = VT_I8;
-  var.hVal.QuadPart = hnsPosition;
+  var.hVal.QuadPart = hnsNewPosition;
 
   m_reader->SetCurrentPosition(GUID_NULL, var);
 
@@ -136,7 +136,7 @@ void VideoPlayer::SetPosition(const LONGLONG &hnsPosition) {
 HRESULT VideoPlayer::OnReadSample(HRESULT hr, DWORD dwStreamIndex,
                                   DWORD dwStreamFlags, LONGLONG llTimestamp,
                                   IMFSample *pSample) {
-  if (m_paused) {
+  if (m_isPaused) {
     return S_OK;
   }
 

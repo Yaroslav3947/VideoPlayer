@@ -15,20 +15,19 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 void MainWindow::connectSignalsAndSlots() {
-  connect(ui->playButton, &QPushButton::clicked, this, &MainWindow::pauseVideo);
   QObject::connect(this->m_videoPlayer.data(), &VideoPlayer::positionChanged,
-                   this, &MainWindow::updateSliderPosition);
+                   this, &MainWindow::onPositionChanged);
   connect(ui->slider, &QSlider::sliderMoved, this, &MainWindow::onSliderMoved);
-  connect(ui->slider, &QSlider::sliderPressed, this, &MainWindow::pauseVideo);
-  connect(ui->slider, &QSlider::sliderReleased, this, &MainWindow::pauseVideo);
+  connect(ui->slider, &QSlider::sliderPressed, this,
+          &MainWindow::onSliderPressed);
+  connect(ui->slider, &QSlider::sliderReleased, this,
+          &MainWindow::onSliderReleased);
+  connect(ui->playButton, &QPushButton::clicked, this, &MainWindow::onPlayPauseVideo);
+  connect(ui->actionOpen_file, &QAction::triggered, this, &MainWindow::onFileOpen);
 }
 
-void MainWindow::onSliderMoved(const int &position) {
-  LONGLONG hnsPosition = static_cast<LONGLONG>(position);  
-  m_videoPlayer->SetPosition(hnsPosition);
-}
 
-void MainWindow::on_actionOpen_file_triggered() {
+void MainWindow::onFileOpen() {
   QString filePath = QFileDialog::getOpenFileName(this, tr("Open File"), "",
                                                   tr("Video Files (*.mp4)"));
 
@@ -38,13 +37,33 @@ void MainWindow::on_actionOpen_file_triggered() {
     m_videoPlayer->OpenURL(wFilePath);
 
     ui->slider->setRange(0, m_videoPlayer->GetDuration());
-
-    qDebug() << m_videoPlayer->GetDuration();
   }
 }
 
-void MainWindow::pauseVideo() { 
-    m_videoPlayer->Pause(); 
+void MainWindow::onSliderMoved(const int &position) {
+  LONGLONG hnsPosition = static_cast<LONGLONG>(position);  
+  m_videoPlayer->SetPosition(hnsPosition);
+}
+
+void MainWindow::onPlayPauseVideo() { 
+    m_videoPlayer->PlayPauseVideo(); 
+}
+
+void MainWindow::onSliderPressed() {
+  if (!m_videoPlayer->GetIsPaused()) {
+    m_videoPlayer->PlayPauseVideo(); 
+  }
+}
+
+void MainWindow::onSliderReleased() {
+  if (m_videoPlayer->GetIsPaused()) {
+    m_videoPlayer->PlayPauseVideo();
+  }
+}
+
+void MainWindow::onPositionChanged(const qint64 &currentPosition) {
+  ui->slider->setValue(currentPosition);
+  updateDurationInfo(currentPosition);
 }
 
 void MainWindow::updateDurationInfo(const qint64 &currentPosition) {
@@ -63,10 +82,4 @@ void MainWindow::updateDurationInfo(const qint64 &currentPosition) {
   QString tStr = currentTimeStr + " / " + totalTimeStr;
   ui->currentContentDuration->setText(tStr);
 }
-
-void MainWindow::updateSliderPosition(const qint64 &currentPosition) {
-  ui->slider->setValue(currentPosition);
-  updateDurationInfo(currentPosition);
-}
-
 MainWindow::~MainWindow() { delete ui; }

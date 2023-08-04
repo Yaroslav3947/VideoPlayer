@@ -32,10 +32,12 @@ class MainWindow : public QMainWindow {
   std::unique_ptr<DXHelper> m_dxhelper;
   VideoPlayer::Ptr m_videoPlayer;
 
- public slots:
-  void pauseVideo();
+ private slots:
+  void onFileOpen();
+  void onPlayPauseVideo();
+  void onSliderPressed();
+  void onSliderReleased();
   void onSliderMoved(const int &position);
-  void on_actionOpen_file_triggered();
   void updateDurationInfo(const qint64 &currentPosition);
-  void updateSliderPosition(const qint64 &currentPosition);
+  void onPositionChanged(const qint64 &currentPosition);
 };
