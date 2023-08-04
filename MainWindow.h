@@ -25,6 +25,8 @@ class MainWindow : public QMainWindow {
   ~MainWindow();
 
  private:
+  void hideUI();
+  void setupUI();
   void connectSignalsAndSlots();
 
  private:

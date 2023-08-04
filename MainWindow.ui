@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1753</width>
+    <width>1849</width>
     <height>776</height>
    </rect>
   </property>
@@ -30,6 +30,9 @@
     </property>
    </widget>
    <widget class="QPushButton" name="playButton">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>220</x>
@@ -39,11 +42,11 @@
      </rect>
     </property>
     <property name="text">
-     <string>Play</string>
+     <string>Pause</string>
     </property>
     <property name="icon">
      <iconset>
-      <normaloff>icons/media-play.png</normaloff>icons/media-play.png</iconset>
+      <normaloff>icons/media-pause.png</normaloff>icons/media-pause.png</iconset>
     </property>
    </widget>
    <widget class="QSlider" name="slider">
@@ -64,7 +67,7 @@
      <rect>
       <x>1610</x>
       <y>110</y>
-      <width>201</width>
+      <width>161</width>
       <height>41</height>
      </rect>
     </property>
@@ -89,7 +92,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1753</width>
+     <width>1849</width>
      <height>26</height>
     </rect>
    </property>
