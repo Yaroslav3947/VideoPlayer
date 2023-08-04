@@ -12,16 +12,28 @@ MainWindow::MainWindow(QWidget *parent)
   m_videoPlayer = VideoPlayer::Ptr(new VideoPlayer(hwnd));
 
   connectSignalsAndSlots();
+
+  hideUI();
+}
+
+void MainWindow::hideUI() {
+  ui->slider->hide();
+  ui->playButton->hide();
+  ui->currentContentDuration->hide();
+}
+
+void MainWindow::setupUI() {
+  ui->slider->show();
+  ui->playButton->show();
+  ui->currentContentDuration->show();
 }
 
 void MainWindow::connectSignalsAndSlots() {
   QObject::connect(this->m_videoPlayer.data(), &VideoPlayer::positionChanged,
                    this, &MainWindow::onPositionChanged);
   connect(ui->slider, &QSlider::sliderMoved, this, &MainWindow::onSliderMoved);
-  connect(ui->slider, &QSlider::sliderPressed, this,
-          &MainWindow::onSliderPressed);
-  connect(ui->slider, &QSlider::sliderReleased, this,
-          &MainWindow::onSliderReleased);
+  connect(ui->slider, &QSlider::sliderPressed, this, &MainWindow::onSliderPressed);
+  connect(ui->slider, &QSlider::sliderReleased, this, &MainWindow::onSliderReleased);
   connect(ui->playButton, &QPushButton::clicked, this, &MainWindow::onPlayPauseVideo);
   connect(ui->actionOpen_file, &QAction::triggered, this, &MainWindow::onFileOpen);
 }
@@ -37,21 +49,32 @@ void MainWindow::onFileOpen() {
     m_videoPlayer->OpenURL(wFilePath);
 
     ui->slider->setRange(0, m_videoPlayer->GetDuration());
+
+    setupUI();
+
+    ////TODO: work out second time opening video
   }
 }
 
 void MainWindow::onSliderMoved(const int &position) {
-  LONGLONG hnsPosition = static_cast<LONGLONG>(position);  
+  LONGLONG hnsPosition = static_cast<LONGLONG>(position);
   m_videoPlayer->SetPosition(hnsPosition);
 }
 
-void MainWindow::onPlayPauseVideo() { 
-    m_videoPlayer->PlayPauseVideo(); 
+void MainWindow::onPlayPauseVideo() {
+  if (m_videoPlayer->GetIsPaused()) {
+    ui->playButton->setText("Pause");
+    ui->playButton->setIcon(QIcon("icons/media-pause.png"));
+  } else {
+    ui->playButton->setText("Play");
+    ui->playButton->setIcon(QIcon("icons/media-play.png"));
+  }
+  m_videoPlayer->PlayPauseVideo();
 }
 
 void MainWindow::onSliderPressed() {
   if (!m_videoPlayer->GetIsPaused()) {
-    m_videoPlayer->PlayPauseVideo(); 
+    m_videoPlayer->PlayPauseVideo();
   }
 }
 
