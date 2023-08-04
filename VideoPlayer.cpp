@@ -1,8 +1,14 @@
 #include "VideoPlayer.h"
 
+VideoPlayer::VideoPlayer(HWND &hwnd)
+    : m_hwnd(hwnd), m_nRefCount(1), m_reader(nullptr) {
+  Initialize();
+}
+
 //-----------------------------------------------------------------------------
 // IUnknown Methods
 //-----------------------------------------------------------------------------
+
 STDMETHODIMP VideoPlayer::QueryInterface(REFIID iid, void **ppv) {
   if (ppv == nullptr) {
     return E_POINTER;
@@ -81,6 +87,48 @@ void VideoPlayer::OpenURL(const WCHAR *sURL) {
   return;
 }
 
+void VideoPlayer::PlayPauseVideo() {
+  if (!m_reader || !m_videoStreamIndex) {
+    return;
+  }
+
+  if (m_isPaused) {
+    m_isPaused = false;
+    m_reader->ReadSample(m_videoStreamIndex, 0, nullptr, nullptr, nullptr,
+                         nullptr);
+  } else {
+    m_isPaused = true;
+  }
+}
+
+LONGLONG VideoPlayer::GetDuration() {
+  LONGLONG duration = 0;
+
+  PROPVARIANT var;
+  PropVariantInit(&var);
+
+  HRESULT hr = m_reader->GetPresentationAttribute(MF_SOURCE_READER_MEDIASOURCE,
+                                                  MF_PD_DURATION, &var);
+  if (SUCCEEDED(hr)) {
+    hr = PropVariantToInt64(var, &duration);
+    PropVariantClear(&var);
+  }
+  return duration;
+}
+
+void VideoPlayer::SetPosition(const LONGLONG &hnsNewPosition) {
+  if (!m_reader) return;
+
+  PROPVARIANT var;
+  PropVariantInit(&var);
+  var.vt = VT_I8;
+  var.hVal.QuadPart = hnsNewPosition;
+
+  m_reader->SetCurrentPosition(GUID_NULL, var);
+
+  PropVariantClear(&var);
+}
+
 //-----------------------------------------------------------------------------
 // Playback Methods
 //-----------------------------------------------------------------------------
@@ -88,27 +136,26 @@ void VideoPlayer::OpenURL(const WCHAR *sURL) {
 HRESULT VideoPlayer::OnReadSample(HRESULT hr, DWORD dwStreamIndex,
                                   DWORD dwStreamFlags, LONGLONG llTimestamp,
                                   IMFSample *pSample) {
+  if (m_isPaused) {
+    return S_OK;
+  }
+
   if (dwStreamFlags & MF_SOURCE_READERF_ENDOFSTREAM) {
     OutputDebugStringA("EndOfStream\n");
     return S_OK;
   }
 
-  ComPtr<ID2D1Bitmap> bitmap = m_dxhelper->CreateBitmapFromVideoSample(pSample);
+  m_videoStreamIndex = dwStreamIndex;
 
+  ComPtr<ID2D1Bitmap> bitmap = m_dxhelper->CreateBitmapFromVideoSample(pSample);
   m_dxhelper->RenderBitmapOnWindow(bitmap);
 
-  //// TODO: add delay
-
-  qDebug() << "OnReadSample()";
+  emit positionChanged(llTimestamp);
 
   hr = m_reader->ReadSample(dwStreamIndex, 0, NULL, NULL, NULL, NULL);
 
   return S_OK;
 }
 
-VideoPlayer::VideoPlayer(HWND &hwnd)
-    : m_hwnd(hwnd), m_nRefCount(1), m_reader(nullptr) {
-  Initialize();
-}
 
 VideoPlayer::~VideoPlayer() { MFShutdown(); }
