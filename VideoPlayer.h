@@ -1,10 +1,14 @@
 #pragma once
 
-#include <mfapi.h>
-#include <shlwapi.h>
-#include <propvarutil.h>
+#include <QObject>
 
-#include "DXHelper.h"
+#include "WinInclude.h"
+
+#include "Audio/Audio.h"
+#include "Audio/MediaReader.h"
+#include "Audio/SoundEffect.h"
+
+#include "DX/DXHelper.h"
 
 
 class VideoPlayer : public QObject, public IMFAsyncCallback, public IMFSourceReaderCallback {
@@ -16,15 +20,15 @@ class VideoPlayer : public QObject, public IMFAsyncCallback, public IMFSourceRea
   virtual ~VideoPlayer();
 
   HRESULT Initialize();
+  void OpenURL(const WCHAR* sURL);
 
   // Playback
   void PlayPauseVideo();
-  void OpenURL(const WCHAR* sURL);
 
-  LONGLONG GetDuration();
   void SetPosition(const LONGLONG& hnsPosition);
 
-  inline bool GetIsPaused() const { return m_isPaused; };
+  LONGLONG GetDuration();
+  inline bool GetIsPaused() const { return m_isPaused; }
 
  signals:
   void positionChanged(qint64 position);
@@ -46,8 +50,12 @@ class VideoPlayer : public QObject, public IMFAsyncCallback, public IMFSourceRea
                        LONGLONG llTimestamp, IMFSample* pSample) override;
 
  private:
+
   ComPtr<IMFSourceReader> m_reader;
   std::unique_ptr<DXHelper> m_dxhelper;
+  std::unique_ptr<MediaReader> m_mediaReader;
+  std::unique_ptr<SoundEffect> m_soundEffect;
+  std::unique_ptr<Audio> m_audio;
 
   long m_nRefCount;
   HWND m_hwnd;

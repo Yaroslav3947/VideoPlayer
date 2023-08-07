@@ -1,7 +1,11 @@
 #include "VideoPlayer.h"
 
 VideoPlayer::VideoPlayer(HWND &hwnd)
-    : m_hwnd(hwnd), m_nRefCount(1), m_reader(nullptr) {
+    : m_hwnd(hwnd),
+      m_nRefCount(1),
+      m_reader(nullptr),
+      m_mediaReader(nullptr),
+      m_soundEffect(nullptr) {
   Initialize();
 }
 
@@ -50,8 +54,24 @@ HRESULT VideoPlayer::Initialize() {
     return E_FAIL;
   }
 
+  m_mediaReader = std::make_unique<MediaReader>();
+  if (m_mediaReader == nullptr) {
+    return E_FAIL;
+  }
+
+  m_soundEffect= std::make_unique<SoundEffect>();
+  if (m_soundEffect == nullptr) {
+    return E_FAIL;
+  }
+
+  m_audio = std::make_unique<Audio>();
+  if (m_audio == nullptr) {
+    return E_FAIL;
+  }
+
   return S_OK;
 }
+
 
 void VideoPlayer::OpenURL(const WCHAR *sURL) {
   if (!sURL) return;
@@ -82,8 +102,23 @@ void VideoPlayer::OpenURL(const WCHAR *sURL) {
   m_reader->SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM, nullptr,
                                 pMediaTypeOut.Get());
 
+  //auto soundData = m_mediaReader->LoadMedia(sURL);
+  auto soundData = m_mediaReader->LoadMedia(L"Resources/SampleSound.wav");
+
+  m_audio->CreateDeviceIndependentResources();
+
+  m_soundEffect->Initialize(m_audio->SoundEffectEngine(),
+                            m_mediaReader->GetOutputWaveFormatEx(),
+                            soundData);
+
+
+  //m_audio->ResumeAudio();
+
+  m_soundEffect->PlaySoundW(1.0f);
+
   m_reader->ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, nullptr, nullptr,
                        nullptr, nullptr);
+
   return;
 }
 
@@ -147,7 +182,8 @@ HRESULT VideoPlayer::OnReadSample(HRESULT hr, DWORD dwStreamIndex,
 
   m_videoStreamIndex = dwStreamIndex;
 
-  ComPtr<ID2D1Bitmap> bitmap = m_dxhelper->CreateBitmapFromVideoSample(pSample);
+  ComPtr<ID2D1Bitmap> bitmap;
+  bitmap = m_dxhelper->CreateBitmapFromVideoSample(pSample);
   m_dxhelper->RenderBitmapOnWindow(bitmap);
 
   emit positionChanged(llTimestamp);
@@ -156,6 +192,5 @@ HRESULT VideoPlayer::OnReadSample(HRESULT hr, DWORD dwStreamIndex,
 
   return S_OK;
 }
-
 
 VideoPlayer::~VideoPlayer() { MFShutdown(); }

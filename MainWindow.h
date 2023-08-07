@@ -5,9 +5,9 @@
 #include <QTimer>
 #include <QVBoxLayout>
 #include <QtWidgets/QMainWindow>
-#include <memory>
 
-#include "DXHelper.h"
+
+#include "DX/DXHelper.h"
 #include "VideoPlayer.h"
 #include "ui_MainWindow.h"
 
@@ -36,7 +36,8 @@ class MainWindow : public QMainWindow {
   VideoPlayer::Ptr m_videoPlayer;
 
  private slots:
-  void onFileOpen();
+  //void onFileOpen();
+  void on_actionOpen_file_triggered();
   void onPlayPauseVideo();
   void onSliderPressed();
   void onSliderReleased();

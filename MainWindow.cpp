@@ -9,11 +9,13 @@ MainWindow::MainWindow(QWidget *parent)
 
   ui->renderWidget->setFixedSize(1280, 720);
   HWND hwnd = reinterpret_cast<HWND>(ui->renderWidget->winId());
-  m_videoPlayer = VideoPlayer::Ptr(new VideoPlayer(hwnd));
+  m_videoPlayer = QSharedPointer<VideoPlayer>::create(hwnd);
 
   connectSignalsAndSlots();
 
-  hideUI();
+  m_videoPlayer->OpenURL(L"Resources/SampleVideo25fpsWIthAudio.mp4");
+
+  ui->slider->setRange(0, m_videoPlayer->GetDuration());
 }
 
 void MainWindow::hideUI() {
@@ -29,19 +31,18 @@ void MainWindow::setupUI() {
 }
 
 void MainWindow::connectSignalsAndSlots() {
+
   QObject::connect(this->m_videoPlayer.data(), &VideoPlayer::positionChanged,
                    this, &MainWindow::onPositionChanged);
   connect(ui->slider, &QSlider::sliderMoved, this, &MainWindow::onSliderMoved);
   connect(ui->slider, &QSlider::sliderPressed, this, &MainWindow::onSliderPressed);
   connect(ui->slider, &QSlider::sliderReleased, this, &MainWindow::onSliderReleased);
   connect(ui->playButton, &QPushButton::clicked, this, &MainWindow::onPlayPauseVideo);
-  connect(ui->actionOpen_file, &QAction::triggered, this, &MainWindow::onFileOpen);
 }
 
-
-void MainWindow::onFileOpen() {
+void MainWindow::on_actionOpen_file_triggered() {
   QString filePath = QFileDialog::getOpenFileName(this, tr("Open File"), "",
-                                                  tr("Video Files (*.mp4)"));
+                               tr("Video Files (*.mp4)"));
 
   if (!filePath.isEmpty()) {
     const wchar_t *wFilePath =
@@ -105,4 +106,7 @@ void MainWindow::updateDurationInfo(const qint64 &currentPosition) {
   QString tStr = currentTimeStr + " / " + totalTimeStr;
   ui->currentContentDuration->setText(tStr);
 }
-MainWindow::~MainWindow() { delete ui; }
+MainWindow::~MainWindow() {
+  delete ui;
+  m_videoPlayer.~QSharedPointer();
+}
