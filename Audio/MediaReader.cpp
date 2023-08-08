@@ -16,7 +16,7 @@ std::vector<byte> MediaReader::LoadMedia(const WCHAR *sURL) {
 
   hr = mediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);
 
-  hr = mediaType->SetGUID(MF_MT_SUBTYPE, MFAudioFormat_AAC);
+  hr = mediaType->SetGUID(MF_MT_SUBTYPE, MFAudioFormat_PCM);
 
   hr = reader->SetCurrentMediaType(
       static_cast<DWORD>(MF_SOURCE_READER_FIRST_AUDIO_STREAM), 0,

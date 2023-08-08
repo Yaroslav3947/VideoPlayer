@@ -12,6 +12,7 @@ class SoundEffect {
   void PlaySound(float volume);
 
  private:
+  WORD m_nBlockAlign;
   bool m_audioAvailable;
   IXAudio2SourceVoice* m_sourceVoice;
   std::vector<byte> m_soundData;

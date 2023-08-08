@@ -5,6 +5,7 @@ SoundEffect::SoundEffect() : m_audioAvailable(false) {}
 void SoundEffect::Initialize(ComPtr<IXAudio2> masteringEngine,
                              WAVEFORMATEX* sourceFormat,
                              std::vector<byte> const& soundData) {
+  m_nBlockAlign = sourceFormat->nBlockAlign;
   m_soundData = soundData;
 
   if (masteringEngine == nullptr) {
@@ -17,7 +18,6 @@ void SoundEffect::Initialize(ComPtr<IXAudio2> masteringEngine,
 }
 
 void SoundEffect::PlaySound(float volume) {
-  XAUDIO2_BUFFER buffer = {0};
 
   if (!m_audioAvailable) {
     // Audio is not available so just return.
@@ -28,10 +28,16 @@ void SoundEffect::PlaySound(float volume) {
   m_sourceVoice->Stop();
   m_sourceVoice->FlushSourceBuffers();
 
+  size_t bufferSize = m_soundData.size();
+  size_t blockAlign = m_nBlockAlign;
+
   // Queue the memory buffer for playback and start the voice.
-  buffer.AudioBytes = (UINT32)m_soundData.size();
-  buffer.pAudioData = m_soundData.data();
+  XAUDIO2_BUFFER buffer = {0};
+  buffer.AudioBytes = static_cast<UINT32>(bufferSize / blockAlign) * blockAlign;
+  buffer.pAudioData = reinterpret_cast<BYTE*>(m_soundData.data());
   buffer.Flags = XAUDIO2_END_OF_STREAM;
+  buffer.LoopCount = XAUDIO2_LOOP_INFINITE; 
+
 
   m_sourceVoice->SetVolume(volume);
   m_sourceVoice->SubmitSourceBuffer(&buffer);

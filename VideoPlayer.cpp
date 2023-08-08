@@ -81,20 +81,19 @@ void VideoPlayer::OpenURL(const WCHAR *sURL) {
 
   // Enable hardware transforms and video processing
   pAttributes->SetUINT32(MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS, TRUE);
-
   pAttributes->SetUINT32(MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, TRUE);
+
+  // Set the asynchronous callback for the source reader
+  pAttributes->SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK,
+                          static_cast<IMFSourceReaderCallback *>(this));
 
   // Set the output media type to RGB32 format
   ComPtr<IMFMediaType> pMediaTypeOut;
   MFCreateMediaType(pMediaTypeOut.GetAddressOf());
 
   pMediaTypeOut->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
-
   pMediaTypeOut->SetGUID(MF_MT_SUBTYPE, MFVideoFormat_RGB32);
 
-  // Set the asynchronous callback for the source reader
-  pAttributes->SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK,
-                          static_cast<IMFSourceReaderCallback *>(this));
 
   MFCreateSourceReaderFromURL(sURL, pAttributes.Get(), m_reader.GetAddressOf());
 
@@ -102,17 +101,13 @@ void VideoPlayer::OpenURL(const WCHAR *sURL) {
   m_reader->SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM, nullptr,
                                 pMediaTypeOut.Get());
 
-  //auto soundData = m_mediaReader->LoadMedia(sURL);
-  auto soundData = m_mediaReader->LoadMedia(L"Resources/SampleSound.wav");
+  auto soundData = m_mediaReader->LoadMedia(L"Resources/SampleVideo25fpsWIthAudio.mp4");
 
   m_audio->CreateDeviceIndependentResources();
 
   m_soundEffect->Initialize(m_audio->SoundEffectEngine(),
                             m_mediaReader->GetOutputWaveFormatEx(),
                             soundData);
-
-
-  //m_audio->ResumeAudio();
 
   m_soundEffect->PlaySoundW(1.0f);
 
