@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include <qdebug.h>
 
 #include "WinInclude.h"
 
@@ -24,6 +25,8 @@ class VideoPlayer : public QObject, public IMFAsyncCallback, public IMFSourceRea
 
   // Playback
   void PlayPauseVideo();
+
+  bool IsAudioSample(DWORD streamIndex);
 
   void SetPosition(const LONGLONG& hnsPosition);
 
