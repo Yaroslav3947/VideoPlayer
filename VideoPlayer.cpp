@@ -123,10 +123,12 @@ void VideoPlayer::PlayPauseVideo() {
   }
 
   if (m_isPaused) {
+    m_audio->ResumeAudio();
     m_isPaused = false;
     m_reader->ReadSample(m_videoStreamIndex, 0, nullptr, nullptr, nullptr,
                          nullptr);
   } else {
+    m_audio->SuspendAudio();
     m_isPaused = true;
   }
 }
