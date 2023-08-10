@@ -43,3 +43,9 @@ void SoundEffect::PlaySound(float volume) {
   m_sourceVoice->SubmitSourceBuffer(&buffer);
   m_sourceVoice->Start();
 }
+
+void SoundEffect::ChangeVolume(const float &volume) {
+  if (m_audioAvailable) {
+    m_sourceVoice->SetVolume(volume);
+  }
+}

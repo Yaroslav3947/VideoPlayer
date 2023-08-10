@@ -214,20 +214,13 @@ HRESULT VideoPlayer::OnReadSample(HRESULT hr, DWORD dwStreamIndex,
     return S_OK;
   }
 
-  LONGLONG sleepTime = 10000000 / m_fps;
-
-  qDebug() << static_cast<DWORD>(sleepTime / 10000);
-
-  //Sleep(static_cast<DWORD>(sleepTime / 10000));
-
   m_videoStreamIndex = dwStreamIndex;
 
   ComPtr<ID2D1Bitmap> bitmap;
   bitmap = m_dxhelper->CreateBitmapFromVideoSample(pSample, m_width, m_height);
   m_dxhelper->RenderBitmapOnWindow(bitmap);
 
-  emit positionChanged(llTimestamp / 1000);
-
+  emit positionChanged(llTimestamp / 100);
 
   hr = m_reader->ReadSample(dwStreamIndex, 0, NULL, NULL, NULL, NULL);
 

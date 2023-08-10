@@ -30,6 +30,8 @@ class VideoPlayer : public QObject, public IMFAsyncCallback, public IMFSourceRea
   LONGLONG GetDuration();
   inline bool GetIsPaused() const { return m_isPaused; }
 
+  SoundEffect* GetSoundEffect() const { return m_soundEffect.get(); }
+
  signals:
   void positionChanged(qint64 position);
 

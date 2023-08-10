@@ -10,6 +10,7 @@ class SoundEffect {
                   std::vector<byte> const& soundData);
 
   void PlaySound(float volume);
+  void ChangeVolume(const float &volume);
 
  private:
   WORD m_nBlockAlign;

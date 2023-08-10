@@ -36,8 +36,8 @@ class MainWindow : public QMainWindow {
   VideoPlayer::Ptr m_videoPlayer;
 
  private slots:
-  //void onFileOpen();
-  void on_actionOpen_file_triggered();
+  void onFileOpen();
+  void onVolumeChanged(const int &value);
   void onPlayPauseVideo();
   void onSliderPressed();
   void onSliderReleased();
