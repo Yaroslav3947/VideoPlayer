@@ -76,6 +76,10 @@ HRESULT VideoPlayer::Initialize() {
 void VideoPlayer::OpenURL(const WCHAR *sURL) {
   if (!sURL) return;
 
+  m_reader.Reset();
+
+
+
   ComPtr<IMFAttributes> pAttributes;
   HRESULT hr = MFCreateAttributes(pAttributes.GetAddressOf(), 1);
 
@@ -198,32 +202,6 @@ float VideoPlayer::GetFPS() {
 
   return 0.0f;
 }
-
-//HRESULT VideoPlayer::OnReadSample(HRESULT hr, DWORD dwStreamIndex,
-//                                  DWORD dwStreamFlags, LONGLONG llTimestamp,
-//                                  IMFSample *pSample) {
-//  if (m_isPaused) {
-//    return S_OK;
-//  }
-//
-//  if (dwStreamFlags & MF_SOURCE_READERF_ENDOFSTREAM) {
-//    OutputDebugStringA("EndOfStream\n");
-//    m_audio->SuspendAudio();
-//    return S_OK;
-//  }
-//
-//  m_videoStreamIndex = dwStreamIndex;
-//
-//  ComPtr<ID2D1Bitmap> bitmap;
-//  bitmap = m_dxhelper->CreateBitmapFromVideoSample(pSample, m_width, m_height);
-//  m_dxhelper->RenderBitmapOnWindow(bitmap);
-//
-//  emit positionChanged(llTimestamp);
-//
-//  hr = m_reader->ReadSample(dwStreamIndex, 0, NULL, NULL, NULL, NULL);
-//
-//  return S_OK;
-//}
 
 HRESULT VideoPlayer::OnReadSample(HRESULT hr, DWORD dwStreamIndex,
                                   DWORD dwStreamFlags, LONGLONG llTimestamp,
