@@ -1,5 +1,7 @@
 #pragma once
 
+#include <qdebug.h>
+
 #include <Windows.h>
 
 #include <Mfidl.h>

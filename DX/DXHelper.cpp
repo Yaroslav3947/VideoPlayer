@@ -51,11 +51,9 @@ void DXHelper::Init(HWND& hwnd) {
       dxgiBackbuffer, &renderTargetProps, m_renderTarget.GetAddressOf());
 }
 
-ComPtr<ID2D1Bitmap> DXHelper::CreateBitmapFromVideoSample(IMFSample* pSample) {
-  ////TODO: get rid of hardcode
-  int width = 1920;
-  int height = 1080;
-
+ComPtr<ID2D1Bitmap> DXHelper::CreateBitmapFromVideoSample(IMFSample* pSample,
+                                                          const UINT32& width,
+                                                          const UINT32& height) {
   ComPtr<IMFMediaBuffer> buffer;
   HRESULT hr = pSample->ConvertToContiguousBuffer(&buffer);
 
@@ -100,7 +98,7 @@ void DXHelper::RenderBitmapOnWindow(ComPtr<ID2D1Bitmap> pBitmap) {
 
   m_renderTarget->EndDraw();
 
-  m_swapChain->Present(1, 0);
+  m_swapChain->Present(0, 0);
 
   return;
 }

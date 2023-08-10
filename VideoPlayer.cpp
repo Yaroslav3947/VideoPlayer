@@ -77,31 +77,36 @@ void VideoPlayer::OpenURL(const WCHAR *sURL) {
   if (!sURL) return;
 
   ComPtr<IMFAttributes> pAttributes;
-  MFCreateAttributes(pAttributes.GetAddressOf(), 1);
+  HRESULT hr = MFCreateAttributes(pAttributes.GetAddressOf(), 1);
 
   // Enable hardware transforms and video processing
-  pAttributes->SetUINT32(MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS, TRUE);
-  pAttributes->SetUINT32(MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, TRUE);
+  hr = pAttributes->SetUINT32(MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS, TRUE);
+  hr = pAttributes->SetUINT32(MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, TRUE);
 
   // Set the asynchronous callback for the source reader
-  pAttributes->SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK,
+  hr = pAttributes->SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK,
                           static_cast<IMFSourceReaderCallback *>(this));
 
   // Set the output media type to RGB32 format
   ComPtr<IMFMediaType> pMediaTypeOut;
-  MFCreateMediaType(pMediaTypeOut.GetAddressOf());
+  hr = MFCreateMediaType(pMediaTypeOut.GetAddressOf());
 
-  pMediaTypeOut->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
-  pMediaTypeOut->SetGUID(MF_MT_SUBTYPE, MFVideoFormat_RGB32);
+  hr = pMediaTypeOut->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
+  hr = pMediaTypeOut->SetGUID(MF_MT_SUBTYPE, MFVideoFormat_RGB32);
 
 
-  MFCreateSourceReaderFromURL(sURL, pAttributes.Get(), m_reader.GetAddressOf());
+  hr = MFCreateSourceReaderFromURL(sURL, pAttributes.Get(),
+                                   m_reader.GetAddressOf());
 
   // Set the output media type for the video stream
-  m_reader->SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM, nullptr,
+  hr = m_reader->SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
+                                     nullptr,
                                 pMediaTypeOut.Get());
 
-  auto soundData = m_mediaReader->LoadMedia(L"Resources/SampleVideo25fpsWIthAudio.mp4");
+
+  hr = GetWidthAndHeight();
+
+  auto soundData = m_mediaReader->LoadMedia(sURL);
 
   m_audio->CreateDeviceIndependentResources();
 
@@ -165,6 +170,17 @@ void VideoPlayer::SetPosition(const LONGLONG &hnsNewPosition) {
 // Playback Methods
 //-----------------------------------------------------------------------------
 
+HRESULT VideoPlayer::GetWidthAndHeight() {
+  ComPtr<IMFMediaType> pMediaType;
+  HRESULT hr = m_reader->GetCurrentMediaType(
+      MF_SOURCE_READER_FIRST_VIDEO_STREAM, &pMediaType);
+  if (SUCCEEDED(hr)) {
+    hr =
+        MFGetAttributeSize(pMediaType.Get(), MF_MT_FRAME_SIZE, &m_width, &m_height);
+  }
+  return hr;
+}
+
 HRESULT VideoPlayer::OnReadSample(HRESULT hr, DWORD dwStreamIndex,
                                   DWORD dwStreamFlags, LONGLONG llTimestamp,
                                   IMFSample *pSample) {
@@ -174,13 +190,14 @@ HRESULT VideoPlayer::OnReadSample(HRESULT hr, DWORD dwStreamIndex,
 
   if (dwStreamFlags & MF_SOURCE_READERF_ENDOFSTREAM) {
     OutputDebugStringA("EndOfStream\n");
+    m_audio->SuspendAudio();
     return S_OK;
   }
 
   m_videoStreamIndex = dwStreamIndex;
 
   ComPtr<ID2D1Bitmap> bitmap;
-  bitmap = m_dxhelper->CreateBitmapFromVideoSample(pSample);
+  bitmap = m_dxhelper->CreateBitmapFromVideoSample(pSample, m_width, m_height);
   m_dxhelper->RenderBitmapOnWindow(bitmap);
 
   emit positionChanged(llTimestamp);

@@ -13,9 +13,9 @@ MainWindow::MainWindow(QWidget *parent)
 
   connectSignalsAndSlots();
 
-  m_videoPlayer->OpenURL(L"Resources/SampleVideo25fpsWIthAudio.mp4");
+  /*m_videoPlayer->OpenURL(L"Resources/SampleVideo25fpsWIthAudio.mp4");
 
-  ui->slider->setRange(0, m_videoPlayer->GetDuration());
+  ui->slider->setRange(0, m_videoPlayer->GetDuration());*/
 }
 
 void MainWindow::hideUI() {
@@ -65,10 +65,10 @@ void MainWindow::onSliderMoved(const int &position) {
 void MainWindow::onPlayPauseVideo() {
   if (m_videoPlayer->GetIsPaused()) {
     ui->playButton->setText("Pause");
-    ui->playButton->setIcon(QIcon("icons/media-pause.png"));
+    ui->playButton->setIcon(QIcon("Resources/icons/media-pause.png"));
   } else {
     ui->playButton->setText("Play");
-    ui->playButton->setIcon(QIcon("icons/media-play.png"));
+    ui->playButton->setIcon(QIcon("Resources/icons/media-play.png"));
   }
   m_videoPlayer->PlayPauseVideo();
 }

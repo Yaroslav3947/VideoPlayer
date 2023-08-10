@@ -33,6 +33,9 @@ class VideoPlayer : public QObject, public IMFAsyncCallback, public IMFSourceRea
  signals:
   void positionChanged(qint64 position);
 
+  private:
+  HRESULT GetWidthAndHeight();
+
  protected:
   // IUnknown methods
   STDMETHODIMP QueryInterface(REFIID iid, void** ppv) override;
@@ -62,4 +65,7 @@ class VideoPlayer : public QObject, public IMFAsyncCallback, public IMFSourceRea
 
   bool m_isPaused = false;
   DWORD m_videoStreamIndex = 0;
+
+  UINT32 m_width = 0;
+  UINT32 m_height = 0;
 };
