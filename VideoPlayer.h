@@ -35,6 +35,7 @@ class VideoPlayer : public QObject, public IMFAsyncCallback, public IMFSourceRea
 
   private:
   HRESULT GetWidthAndHeight();
+   float GetFPS();
 
  protected:
   // IUnknown methods
@@ -66,6 +67,7 @@ class VideoPlayer : public QObject, public IMFAsyncCallback, public IMFSourceRea
   bool m_isPaused = false;
   DWORD m_videoStreamIndex = 0;
 
+  float m_fps = 0.0;
   UINT32 m_width = 0;
   UINT32 m_height = 0;
 };

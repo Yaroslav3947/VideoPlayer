@@ -12,10 +12,6 @@ MainWindow::MainWindow(QWidget *parent)
   m_videoPlayer = QSharedPointer<VideoPlayer>::create(hwnd);
 
   connectSignalsAndSlots();
-
-  /*m_videoPlayer->OpenURL(L"Resources/SampleVideo25fpsWIthAudio.mp4");
-
-  ui->slider->setRange(0, m_videoPlayer->GetDuration());*/
 }
 
 void MainWindow::hideUI() {
@@ -49,7 +45,7 @@ void MainWindow::on_actionOpen_file_triggered() {
         reinterpret_cast<const wchar_t *>(filePath.utf16());
     m_videoPlayer->OpenURL(wFilePath);
 
-    ui->slider->setRange(0, m_videoPlayer->GetDuration());
+    ui->slider->setRange(0, m_videoPlayer->GetDuration() / 1000);
 
     setupUI();
 
@@ -59,7 +55,7 @@ void MainWindow::on_actionOpen_file_triggered() {
 
 void MainWindow::onSliderMoved(const int &position) {
   LONGLONG hnsPosition = static_cast<LONGLONG>(position);
-  m_videoPlayer->SetPosition(hnsPosition);
+  m_videoPlayer->SetPosition(hnsPosition * 1000);
 }
 
 void MainWindow::onPlayPauseVideo() {
@@ -87,7 +83,7 @@ void MainWindow::onSliderReleased() {
 
 void MainWindow::onPositionChanged(const qint64 &currentPosition) {
   ui->slider->setValue(currentPosition);
-  updateDurationInfo(currentPosition);
+  updateDurationInfo(currentPosition * 1000);
 }
 
 void MainWindow::updateDurationInfo(const qint64 &currentPosition) {

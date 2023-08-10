@@ -105,6 +105,7 @@ void VideoPlayer::OpenURL(const WCHAR *sURL) {
 
 
   hr = GetWidthAndHeight();
+  m_fps = GetFPS();
 
   auto soundData = m_mediaReader->LoadMedia(sURL);
 
@@ -181,6 +182,49 @@ HRESULT VideoPlayer::GetWidthAndHeight() {
   return hr;
 }
 
+float VideoPlayer::GetFPS() {
+  ComPtr<IMFMediaType> pMediaType = nullptr;
+  HRESULT hr = m_reader->GetCurrentMediaType(
+      MF_SOURCE_READER_FIRST_VIDEO_STREAM, &pMediaType);
+  if (SUCCEEDED(hr)) {
+    UINT32 numerator, denominator;
+    hr = MFGetAttributeRatio(pMediaType.Get(), MF_MT_FRAME_RATE, &numerator,
+                             &denominator);
+
+    if (SUCCEEDED(hr) && denominator > 0) {
+      return static_cast<float>(numerator) / static_cast<float>(denominator);
+    }
+  }
+
+  return 0.0f;
+}
+
+//HRESULT VideoPlayer::OnReadSample(HRESULT hr, DWORD dwStreamIndex,
+//                                  DWORD dwStreamFlags, LONGLONG llTimestamp,
+//                                  IMFSample *pSample) {
+//  if (m_isPaused) {
+//    return S_OK;
+//  }
+//
+//  if (dwStreamFlags & MF_SOURCE_READERF_ENDOFSTREAM) {
+//    OutputDebugStringA("EndOfStream\n");
+//    m_audio->SuspendAudio();
+//    return S_OK;
+//  }
+//
+//  m_videoStreamIndex = dwStreamIndex;
+//
+//  ComPtr<ID2D1Bitmap> bitmap;
+//  bitmap = m_dxhelper->CreateBitmapFromVideoSample(pSample, m_width, m_height);
+//  m_dxhelper->RenderBitmapOnWindow(bitmap);
+//
+//  emit positionChanged(llTimestamp);
+//
+//  hr = m_reader->ReadSample(dwStreamIndex, 0, NULL, NULL, NULL, NULL);
+//
+//  return S_OK;
+//}
+
 HRESULT VideoPlayer::OnReadSample(HRESULT hr, DWORD dwStreamIndex,
                                   DWORD dwStreamFlags, LONGLONG llTimestamp,
                                   IMFSample *pSample) {
@@ -194,17 +238,25 @@ HRESULT VideoPlayer::OnReadSample(HRESULT hr, DWORD dwStreamIndex,
     return S_OK;
   }
 
+  LONGLONG sleepTime = 10000000 / m_fps;
+
+  qDebug() << static_cast<DWORD>(sleepTime / 10000);
+
+  //Sleep(static_cast<DWORD>(sleepTime / 10000));
+
   m_videoStreamIndex = dwStreamIndex;
 
   ComPtr<ID2D1Bitmap> bitmap;
   bitmap = m_dxhelper->CreateBitmapFromVideoSample(pSample, m_width, m_height);
   m_dxhelper->RenderBitmapOnWindow(bitmap);
 
-  emit positionChanged(llTimestamp);
+  emit positionChanged(llTimestamp / 1000);
+
 
   hr = m_reader->ReadSample(dwStreamIndex, 0, NULL, NULL, NULL, NULL);
 
   return S_OK;
 }
+
 
 VideoPlayer::~VideoPlayer() { MFShutdown(); }

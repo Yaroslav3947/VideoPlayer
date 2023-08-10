@@ -1,24 +1,26 @@
 #include "DXHelper.h"
 
+#include <algorithm>
+
 DXHelper::DXHelper(HWND& hwnd) : m_hwnd(hwnd) {
   Init(hwnd);
 }
 
 void DXHelper::Init(HWND& hwnd) {
   DXGI_SWAP_CHAIN_DESC desc = {};
-  desc.BufferDesc.Width = 0;
-  desc.BufferDesc.Height = 0;
+  desc.BufferDesc.Width = 1280;
+  desc.BufferDesc.Height = 720;
   desc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-  desc.BufferDesc.RefreshRate.Numerator = 0;
-  desc.BufferDesc.RefreshRate.Denominator = 0;
+  desc.BufferDesc.RefreshRate.Numerator = 60;
+  desc.BufferDesc.RefreshRate.Denominator = 1;
   desc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
   desc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
   desc.SampleDesc.Count = 1;
   desc.SampleDesc.Quality = 0;
-  desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+  desc.BufferUsage = DXGI_USAGE_BACK_BUFFER | DXGI_USAGE_RENDER_TARGET_OUTPUT;
   desc.BufferCount = 2;
   desc.OutputWindow = hwnd;
-  desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+  desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
   desc.Windowed = true;
 
   D3D_FEATURE_LEVEL levels[] = {D3D_FEATURE_LEVEL_9_1,  D3D_FEATURE_LEVEL_9_2,
@@ -44,11 +46,11 @@ void DXHelper::Init(HWND& hwnd) {
                                    D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM,
                                                      D2D1_ALPHA_MODE_IGNORE));
 
-  IDXGISurface* dxgiBackbuffer;
+  ComPtr<IDXGISurface> dxgiBackbuffer;
   m_swapChain->GetBuffer(0, IID_PPV_ARGS(&dxgiBackbuffer));
 
   hr = m_factory->CreateDxgiSurfaceRenderTarget(
-      dxgiBackbuffer, &renderTargetProps, m_renderTarget.GetAddressOf());
+      dxgiBackbuffer.Get(), &renderTargetProps, m_renderTarget.GetAddressOf());
 }
 
 ComPtr<ID2D1Bitmap> DXHelper::CreateBitmapFromVideoSample(IMFSample* pSample,
@@ -87,18 +89,26 @@ void DXHelper::RenderBitmapOnWindow(ComPtr<ID2D1Bitmap> pBitmap) {
   D2D1_SIZE_F renderTargetSize = m_renderTarget->GetSize();
   D2D1_SIZE_F bitmapSize = pBitmap->GetSize();
 
+  float scaleX = renderTargetSize.width / bitmapSize.width;
+  float scaleY = renderTargetSize.height / bitmapSize.height;
+
+  float scale = min(scaleX, scaleY);
+
+  D2D1_SIZE_F scaledBitmapSize = {bitmapSize.width * scale,
+                                  bitmapSize.height * scale};
+
   D2D1_POINT_2F upperLeftCorner =
-      D2D1::Point2F((renderTargetSize.width - bitmapSize.width) / 2.f,
-                    (renderTargetSize.height - bitmapSize.height) / 2.f);
+      D2D1::Point2F((renderTargetSize.width - scaledBitmapSize.width) / 2.f,
+                    (renderTargetSize.height - scaledBitmapSize.height) / 2.f);
 
   m_renderTarget->DrawBitmap(
       pBitmap.Get(), D2D1::RectF(upperLeftCorner.x, upperLeftCorner.y,
-                                 upperLeftCorner.x + bitmapSize.width,
-                                 upperLeftCorner.y + bitmapSize.height));
+                                 upperLeftCorner.x + scaledBitmapSize.width,
+                                 upperLeftCorner.y + scaledBitmapSize.height));
 
   m_renderTarget->EndDraw();
 
-  m_swapChain->Present(0, 0);
+  m_swapChain->Present(1, 0);
 
   return;
 }
