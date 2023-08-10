@@ -78,8 +78,6 @@ void VideoPlayer::OpenURL(const WCHAR *sURL) {
 
   m_reader.Reset();
 
-
-
   ComPtr<IMFAttributes> pAttributes;
   HRESULT hr = MFCreateAttributes(pAttributes.GetAddressOf(), 1);
 
