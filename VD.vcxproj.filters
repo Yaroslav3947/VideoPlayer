@@ -40,50 +40,75 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DXHelper.cpp">
+    <ClCompile Include="DX\DXHelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="VideoPlayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Audio\SoundEffect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Audio\MediaReader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Audio\Audio.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DXHelper.h">
+    <ClInclude Include="DX\DXHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Audio\SoundEffect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Audio\MediaReader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WinInclude.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Audio\Audio.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Media Include="SampleVideo25fps.mp4" />
+    <Media Include="Resources\SampleVideo25fps.mp4" />
+    <Media Include="Resources\SampleVideo25fpsWithAudio.mp4" />
+    <Media Include="Resources\SampleSound.wav">
+      <Filter>Resource Files</Filter>
+    </Media>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="icons\folder.png">
+    <Image Include="Resources\icons\folder.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="icons\media-pause.png">
+    <Image Include="Resources\icons\media-pause.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="icons\media-play.png">
+    <Image Include="Resources\icons\media-play.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="icons\media-skip-backward.png">
+    <Image Include="Resources\icons\media-skip-backward.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="icons\media-skip-forward.png">
+    <Image Include="Resources\icons\media-skip-forward.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="icons\media-step-backward.png">
+    <Image Include="Resources\icons\media-step-backward.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="icons\media-step-forward.png">
+    <Image Include="Resources\icons\media-step-forward.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="icons\media-stop.png">
+    <Image Include="Resources\icons\media-stop.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="icons\menu.png">
+    <Image Include="Resources\icons\menu.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="icons\volume-high.png">
+    <Image Include="Resources\icons\volume-high.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

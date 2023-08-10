@@ -60,7 +60,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
-      <AdditionalDependencies>dxgi.lib;d3d11.lib;d2d1.lib;dxguid.lib;mfplat.lib;mfuuid.lib;winmm.lib;Propsys.lib;mfreadwrite.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>mf.lib;dxgi.lib;d3d11.lib;d2d1.lib;dxguid.lib;mfplat.lib;mfuuid.lib;winmm.lib;Propsys.lib;mfreadwrite.lib;wmcodecdspuuid.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
@@ -88,32 +88,41 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Audio\Audio.cpp" />
+    <ClCompile Include="Audio\MediaReader.cpp" />
+    <ClCompile Include="Audio\SoundEffect.cpp" />
     <ClCompile Include="VideoPlayer.cpp" />
     <QtRcc Include="MainWindow.qrc" />
     <QtUic Include="MainWindow.ui" />
     <QtMoc Include="MainWindow.h" />
-    <ClCompile Include="DXHelper.cpp" />
+    <ClCompile Include="DX\DXHelper.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DXHelper.h" />
+    <ClInclude Include="Audio\Audio.h" />
+    <ClInclude Include="DX\DXHelper.h" />
+    <ClInclude Include="Audio\MediaReader.h" />
+    <ClInclude Include="Audio\SoundEffect.h" />
+    <ClInclude Include="WinInclude.h" />
     <QtMoc Include="VideoPlayer.h" />
   </ItemGroup>
   <ItemGroup>
-    <Media Include="SampleVideo25fps.mp4" />
+    <Media Include="Resources\SampleSound.wav" />
+    <Media Include="Resources\SampleVideo25fps.mp4" />
+    <Media Include="Resources\SampleVideo25fpsWithAudio.mp4" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="icons\folder.png" />
-    <Image Include="icons\media-pause.png" />
-    <Image Include="icons\media-play.png" />
-    <Image Include="icons\media-skip-backward.png" />
-    <Image Include="icons\media-skip-forward.png" />
-    <Image Include="icons\media-step-backward.png" />
-    <Image Include="icons\media-step-forward.png" />
-    <Image Include="icons\media-stop.png" />
-    <Image Include="icons\menu.png" />
-    <Image Include="icons\volume-high.png" />
+    <Image Include="Resources\icons\folder.png" />
+    <Image Include="Resources\icons\media-pause.png" />
+    <Image Include="Resources\icons\media-play.png" />
+    <Image Include="Resources\icons\media-skip-backward.png" />
+    <Image Include="Resources\icons\media-skip-forward.png" />
+    <Image Include="Resources\icons\media-step-backward.png" />
+    <Image Include="Resources\icons\media-step-forward.png" />
+    <Image Include="Resources\icons\media-stop.png" />
+    <Image Include="Resources\icons\menu.png" />
+    <Image Include="Resources\icons\volume-high.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
