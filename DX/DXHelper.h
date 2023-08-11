@@ -15,7 +15,6 @@ class DXHelper {
   ComPtr<ID2D1Bitmap> CreateBitmapFromVideoSample(IMFSample* pSample,
                                                   const UINT32& width,
                                                   const UINT32& height);
-
  private:
   HWND m_hwnd;
   ComPtr<ID3D11Device> m_device;
