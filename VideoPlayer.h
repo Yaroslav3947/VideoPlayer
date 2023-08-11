@@ -26,6 +26,7 @@ class VideoPlayer : public QObject, public IMFAsyncCallback, public IMFSourceRea
   void PlayPauseVideo();
 
   void SetPosition(const LONGLONG& hnsPosition);
+  HRESULT ConfigureDecoder(DWORD dwStreamIndex);
 
   LONGLONG GetDuration();
   inline bool GetIsPaused() const { return m_isPaused; }

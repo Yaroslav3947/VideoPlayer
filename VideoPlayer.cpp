@@ -89,37 +89,15 @@ void VideoPlayer::OpenURL(const WCHAR *sURL) {
   hr = pAttributes->SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK,
                           static_cast<IMFSourceReaderCallback *>(this));
 
-  // Set the output media type to RGB32 format
-  ComPtr<IMFMediaType> pMediaTypeOut;
-  hr = MFCreateMediaType(pMediaTypeOut.GetAddressOf());
-
-  hr = pMediaTypeOut->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
-  hr = pMediaTypeOut->SetGUID(MF_MT_SUBTYPE, MFVideoFormat_RGB32);
-
-
   hr = MFCreateSourceReaderFromURL(sURL, pAttributes.Get(),
                                    m_reader.GetAddressOf());
 
-  // Set the output media type for the video stream
-  hr = m_reader->SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,
-                                     nullptr,
-                                pMediaTypeOut.Get());
-
-
   hr = GetWidthAndHeight();
+
   m_fps = GetFPS();
 
-  auto soundData = m_mediaReader->LoadMedia(sURL);
 
-  m_audio->CreateDeviceIndependentResources();
-
-  m_soundEffect->Initialize(m_audio->SoundEffectEngine(),
-                            m_mediaReader->GetOutputWaveFormatEx(),
-                            soundData);
-
-  m_soundEffect->PlaySoundW(1.0f);
-
-  m_reader->ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, nullptr, nullptr,
+  m_reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, 0, nullptr, nullptr,
                        nullptr, nullptr);
 
   return;
@@ -201,6 +179,86 @@ float VideoPlayer::GetFPS() {
   return 0.0f;
 }
 
+//HRESULT VideoPlayer::OnReadSample(HRESULT hr, DWORD dwStreamIndex,
+//                                  DWORD dwStreamFlags, LONGLONG llTimestamp,
+//                                  IMFSample *pSample) {
+//  if (m_isPaused) {
+//    return S_OK;
+//  }
+//
+//  if (dwStreamFlags & MF_SOURCE_READERF_ENDOFSTREAM) {
+//    OutputDebugStringA("EndOfStream\n");
+//    m_audio->SuspendAudio();
+//    return S_OK;
+//  }
+//
+//  m_videoStreamIndex = dwStreamIndex;
+//
+//  ComPtr<ID2D1Bitmap> bitmap;
+//  bitmap = m_dxhelper->CreateBitmapFromVideoSample(pSample, m_width, m_height);
+//  m_dxhelper->RenderBitmapOnWindow(bitmap);
+//
+//  emit positionChanged(llTimestamp / 100);
+//
+//  hr = m_reader->ReadSample(dwStreamIndex, 0, NULL, NULL, NULL, NULL);
+//
+//  return S_OK;
+//}
+
+HRESULT VideoPlayer::ConfigureDecoder(DWORD dwStreamIndex) {
+  ComPtr<IMFMediaType> pNativeType;
+  ComPtr<IMFMediaType> pType;
+
+  // Find the native format of the stream.
+  HRESULT hr = m_reader->GetNativeMediaType(dwStreamIndex, 0, &pNativeType);
+  if (FAILED(hr)) {
+    return hr;
+  }
+
+  GUID majorType, subtype;
+
+  // Find the major type.
+  hr = pNativeType->GetGUID(MF_MT_MAJOR_TYPE, &majorType);
+  if (FAILED(hr)) {
+    goto done;
+  }
+
+  // Define the output type.
+  hr = MFCreateMediaType(&pType);
+  if (FAILED(hr)) {
+    goto done;
+  }
+
+  hr = pType->SetGUID(MF_MT_MAJOR_TYPE, majorType);
+  if (FAILED(hr)) {
+    goto done;
+  }
+
+  // Select a subtype.
+  if (majorType == MFMediaType_Video) {
+    subtype = MFVideoFormat_RGB32;
+  } else if (majorType == MFMediaType_Audio) {
+    subtype = MFAudioFormat_PCM;
+  } else {
+    // Unrecognized type. Skip.
+    goto done;
+  }
+
+  hr = pType->SetGUID(MF_MT_SUBTYPE, subtype);
+  if (FAILED(hr)) {
+    goto done;
+  }
+
+  // Set the uncompressed format.
+  hr = m_reader->SetCurrentMediaType(dwStreamIndex, NULL, pType.Get());
+  if (FAILED(hr)) {
+    goto done;
+  }
+
+done:
+  return hr;
+}
+
 HRESULT VideoPlayer::OnReadSample(HRESULT hr, DWORD dwStreamIndex,
                                   DWORD dwStreamFlags, LONGLONG llTimestamp,
                                   IMFSample *pSample) {
@@ -216,13 +274,22 @@ HRESULT VideoPlayer::OnReadSample(HRESULT hr, DWORD dwStreamIndex,
 
   m_videoStreamIndex = dwStreamIndex;
 
-  ComPtr<ID2D1Bitmap> bitmap;
-  bitmap = m_dxhelper->CreateBitmapFromVideoSample(pSample, m_width, m_height);
-  m_dxhelper->RenderBitmapOnWindow(bitmap);
+  if (dwStreamIndex == 1) {
 
-  emit positionChanged(llTimestamp / 100);
+    ComPtr<ID2D1Bitmap> bitmap;
+    bitmap =
+        m_dxhelper->CreateBitmapFromVideoSample(pSample, m_width, m_height);
+    m_dxhelper->RenderBitmapOnWindow(bitmap);
 
-  hr = m_reader->ReadSample(dwStreamIndex, 0, NULL, NULL, NULL, NULL);
+    qDebug() << "Video" << dwStreamIndex;
+
+    emit positionChanged(llTimestamp / 100);
+  } else if (dwStreamIndex == 0) {
+    qDebug() << "Audio" << dwStreamIndex;
+  }
+
+  hr = m_reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, 0, NULL, NULL, NULL,
+                            NULL);
 
   return S_OK;
 }
