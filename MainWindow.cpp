@@ -27,7 +27,7 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
   ui->renderWidget->setFixedSize(newWidth, newHeight);
 
   if (m_videoPlayer) {
-    m_videoPlayer->GetDxHelper()->ResizeSwapChain(newWidth, newHeight);
+    //m_videoPlayer->GetDxHelper()->ResizeSwapChain(newWidth, newHeight);
   }
   qDebug() << "Changed" << newWidth << newHeight;
 }

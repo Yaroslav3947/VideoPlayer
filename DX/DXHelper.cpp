@@ -81,11 +81,11 @@ ComPtr<ID2D1Bitmap> DXHelper::CreateBitmapFromVideoSample(IMFSample* pSample,
   return bitmap;
 }
 
-void DXHelper::ResizeSwapChain(const UINT32& width, const UINT32& height) {
-  m_swapChain->ResizeBuffers(2, width, height, DXGI_FORMAT_UNKNOWN,
-                             DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH |
-                                 DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING);
-}
+//void DXHelper::ResizeSwapChain(const UINT32& width, const UINT32& height) {
+//  m_swapChain->ResizeBuffers(2, width, height, DXGI_FORMAT_UNKNOWN,
+//                             DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH |
+//                                 DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING);
+//}
 
 void DXHelper::RenderBitmapOnWindow(ComPtr<ID2D1Bitmap> pBitmap) {
   m_renderTarget->BeginDraw();
