@@ -76,9 +76,8 @@
   <ItemGroup>
     <Media Include="Resources\SampleVideo25fps.mp4" />
     <Media Include="Resources\SampleVideo25fpsWithAudio.mp4" />
-    <Media Include="Resources\SampleSound.wav">
-      <Filter>Resource Files</Filter>
-    </Media>
+    <Media Include="Resources\VideoMusk30fps.mp4" />
+    <Media Include="Resources\SampleVideo60fps.mp4" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\icons\folder.png">
