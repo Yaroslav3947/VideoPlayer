@@ -7,13 +7,29 @@ MainWindow::MainWindow(QWidget *parent)
   setWindowTitle("Video Player");
   resize(1920, 1080);
 
-  ui->renderWidget->setFixedSize(1280, 720);
+  ui->renderWidget->setBaseSize(1280, 720);
   HWND hwnd = reinterpret_cast<HWND>(ui->renderWidget->winId());
   m_videoPlayer = QSharedPointer<VideoPlayer>::create(hwnd);
 
   connectSignalsAndSlots();
 
   hideUI();
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event) {
+  QMainWindow::resizeEvent(event);
+
+  
+  int newWidth = ui->renderWidget->width();
+  int newHeight =
+      static_cast<int>(newWidth * (9.0 / 16.0));
+
+  ui->renderWidget->setFixedSize(newWidth, newHeight);
+
+  if (m_videoPlayer) {
+    m_videoPlayer->GetDxHelper()->ResizeSwapChain(newWidth, newHeight);
+  }
+  qDebug() << "Changed" << newWidth << newHeight;
 }
 
 void MainWindow::hideUI() {
