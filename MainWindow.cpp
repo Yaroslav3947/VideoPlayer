@@ -54,7 +54,7 @@ void MainWindow::setupUI() {
   ui->slider->show();
   ui->playButton->show();
   ui->soundButton->show();
-  ui->volumeSlider->show();
+  //ui->volumeSlider->show();
   ui->currentContentDuration->show();
 
   ui->volumeSlider->setRange(0, maxVolumeSliderValue);

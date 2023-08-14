@@ -155,12 +155,7 @@ void VideoPlayer::SetPosition(LONGLONG &hnsNewPosition) {
   var.hVal.QuadPart = hnsNewPosition;
 
   //winrt::check_hresult(m_reader->SetCurrentPosition(GUID_NULL, var));
-
   m_reader->SetCurrentPosition(GUID_NULL, var);
-
-  m_reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, 0, nullptr, nullptr, nullptr,
-                       nullptr);
-
   
   PropVariantClear(&var);
 }
