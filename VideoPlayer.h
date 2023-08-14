@@ -70,10 +70,12 @@ class VideoPlayer : public QObject,
   HWND m_hwnd;
 
   bool m_isPaused = false;
-  DWORD m_videoStreamIndex = 0;
+  DWORD m_streamIndex = 0;
   LONGLONG m_currentPosition = 0;
 
   float m_fps = 0.0;
   UINT32 m_width = 0;
   UINT32 m_height = 0;
+
+  enum class StreamIndex { audioStreamIndex = 0, videoStreamIndex = 1 };
 };

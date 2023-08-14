@@ -1,16 +1,21 @@
 #include "SoundEffect.h"
 
-SoundEffect::SoundEffect() : m_audioAvailable(false), m_volume{1.0} {}
+SoundEffect::SoundEffect()
+    : m_audioAvailable(false),
+      m_volume{1.0},
+      m_isPlaying{false},
+      m_sourceFormat{nullptr} {}
 
 void SoundEffect::Initialize(ComPtr<IXAudio2> masteringEngine,
                              WAVEFORMATEX* sourceFormat) {
+  m_sourceFormat = sourceFormat;
   if (masteringEngine == nullptr) {
     m_audioAvailable = false;
     return;
   }
 
   winrt::check_hresult(
-      masteringEngine->CreateSourceVoice(&m_sourceVoice, sourceFormat));
+      masteringEngine->CreateSourceVoice(&m_sourceVoice, m_sourceFormat));
   m_audioAvailable = true;
 }
 
@@ -32,8 +37,11 @@ void SoundEffect::PlaySound(std::vector<byte> const& soundData) {
   buffer.Flags = XAUDIO2_END_OF_STREAM;
 
   winrt::check_hresult(m_sourceVoice->SubmitSourceBuffer(&buffer));
+
   winrt::check_hresult(m_sourceVoice->Start());
 }
+
+
 
 void SoundEffect::ChangeVolume(const float& volume) {
   if (m_audioAvailable) {

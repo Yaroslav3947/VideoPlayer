@@ -1,4 +1,5 @@
 #include "VideoPlayer.h"
+#include <iostream>
 
 VideoPlayer::VideoPlayer(HWND &hwnd)
     : m_hwnd(hwnd),
@@ -105,8 +106,8 @@ void VideoPlayer::InitAudioAndVideoTypes() {
   pAudioType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);
   pAudioType->SetGUID(MF_MT_SUBTYPE, MFAudioFormat_PCM);
 
-  winrt::check_hresult(
-      m_reader->SetCurrentMediaType(0, nullptr, pAudioType.Get()));
+  winrt::check_hresult(m_reader->SetCurrentMediaType(
+      (DWORD)StreamIndex::audioStreamIndex, nullptr, pAudioType.Get()));
 
   ComPtr<IMFMediaType> pVideoType;
   MFCreateMediaType(&pVideoType);
@@ -114,8 +115,8 @@ void VideoPlayer::InitAudioAndVideoTypes() {
   pVideoType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
   pVideoType->SetGUID(MF_MT_SUBTYPE, MFVideoFormat_RGB32);
 
-  winrt::check_hresult(
-      m_reader->SetCurrentMediaType(1, nullptr, pVideoType.Get()));
+  winrt::check_hresult(m_reader->SetCurrentMediaType(
+      (DWORD)StreamIndex::videoStreamIndex, nullptr, pVideoType.Get()));
 }
 
 void VideoPlayer::PlayPauseVideo() {
@@ -123,7 +124,7 @@ void VideoPlayer::PlayPauseVideo() {
 
   if (!m_isPaused) {
     m_audio->ResumeAudio();
-    m_reader->ReadSample(m_videoStreamIndex, 0, nullptr, nullptr, nullptr,
+    m_reader->ReadSample(m_streamIndex, 0, nullptr, nullptr, nullptr,
                          nullptr);
   } else {
     m_audio->SuspendAudio();
@@ -147,13 +148,18 @@ LONGLONG VideoPlayer::GetDuration() {
 
 void VideoPlayer::SetPosition(LONGLONG &hnsNewPosition) {
   if (!m_reader) return;
-
+  
   PROPVARIANT var;
   PropVariantInit(&var);
   var.vt = VT_I8;
   var.hVal.QuadPart = hnsNewPosition;
 
+  //winrt::check_hresult(m_reader->SetCurrentPosition(GUID_NULL, var));
+
   m_reader->SetCurrentPosition(GUID_NULL, var);
+
+  m_reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, 0, nullptr, nullptr, nullptr,
+                       nullptr);
 
   
   PropVariantClear(&var);
@@ -201,9 +207,9 @@ HRESULT VideoPlayer::OnReadSample(HRESULT hr, DWORD dwStreamIndex,
     return S_OK;
   }
 
-  m_videoStreamIndex = dwStreamIndex;
+  m_streamIndex = dwStreamIndex;
 
-  if (dwStreamIndex == 1) {
+  if (dwStreamIndex == (DWORD)StreamIndex::videoStreamIndex) {
     ComPtr<ID2D1Bitmap> bitmap;
     bitmap =
         m_dxhelper->CreateBitmapFromVideoSample(pSample, m_width, m_height);
@@ -211,14 +217,13 @@ HRESULT VideoPlayer::OnReadSample(HRESULT hr, DWORD dwStreamIndex,
 
     emit positionChanged(llTimestamp / 100);
 
-  } else if (dwStreamIndex == 0) {
+  } else if (dwStreamIndex == (DWORD)StreamIndex::audioStreamIndex) {
     auto soundData = m_mediaReader->LoadMedia(pSample);
     m_soundEffect->PlaySound(soundData);
   }
 
-  winrt::check_hresult(m_reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, 0, NULL,
-                                           NULL, NULL,
-                            NULL));
+  winrt::check_hresult(m_reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, 0,
+                                            NULL, NULL, NULL, NULL));
 
   return S_OK;
 }

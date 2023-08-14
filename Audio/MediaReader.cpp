@@ -20,7 +20,6 @@ std::vector<byte> MediaReader::LoadMedia(ComPtr<IMFSample> pSample) {
   return fileData;
 }
 
-
 WAVEFORMATEX* MediaReader::GetWaveFormat(ComPtr<IMFSourceReader> reader) {
   ComPtr<IMFMediaType> outputMediaType;
   winrt::check_hresult(
@@ -31,9 +30,14 @@ WAVEFORMATEX* MediaReader::GetWaveFormat(ComPtr<IMFSourceReader> reader) {
   winrt::check_hresult(MFCreateWaveFormatExFromMFMediaType(
       outputMediaType.Get(), &pWaveFormat, &size));
 
-  WAVEFORMATEX* waveFormat = new WAVEFORMATEX;
-  CopyMemory(waveFormat, pWaveFormat, min(size, sizeof(WAVEFORMATEX)));
-  CoTaskMemFree(pWaveFormat);
-
-  return waveFormat;
+  WAVEFORMATEX* waveFormat = (WAVEFORMATEX*)CoTaskMemAlloc(size);
+  if (waveFormat) {
+    ZeroMemory(waveFormat, size);
+    CopyMemory(waveFormat, pWaveFormat, min(size, sizeof(WAVEFORMATEX)));
+    CoTaskMemFree(pWaveFormat);
+    return waveFormat;
+  } else {
+    CoTaskMemFree(pWaveFormat);
+    return nullptr;
+  }
 }
