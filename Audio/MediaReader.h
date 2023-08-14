@@ -4,10 +4,7 @@
 
 class MediaReader {
  public:
-  MediaReader();
-
-  //std::vector<byte> LoadMedia(const WCHAR *sURL);
-  //WAVEFORMATEX* GetOutputWaveFormatEx();
+  MediaReader() = default;
 
   std::vector<byte> LoadMedia(ComPtr<IMFSample> pSample);
   WAVEFORMATEX *GetWaveFormat(ComPtr<IMFSourceReader> reader);

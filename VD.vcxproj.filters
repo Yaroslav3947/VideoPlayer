@@ -110,6 +110,12 @@
     <Image Include="Resources\icons\volume-high.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="Resources\icons\volume-unmute.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\icons\volume-mute.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="VideoPlayer.h">
