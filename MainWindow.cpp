@@ -16,11 +16,11 @@ MainWindow::MainWindow(QWidget *parent)
 
   QBoxLayout *mainLayout = new QVBoxLayout(ui->centralWidget);
   renderWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
- 
+
   QHBoxLayout *bottomMenuLayout = new QHBoxLayout();
-  bottomMenuLayout->addWidget(ui->playButton);  
-  bottomMenuLayout->addWidget(ui->soundButton);  
-  bottomMenuLayout->addWidget(ui->currentContentDuration);  
+  bottomMenuLayout->addWidget(ui->playButton);
+  bottomMenuLayout->addWidget(ui->soundButton);
+  bottomMenuLayout->addWidget(ui->currentContentDuration);
   bottomMenuLayout->addWidget(ui->slider);
 
   mainLayout->addLayout(renderLayout);
@@ -36,18 +36,8 @@ MainWindow::MainWindow(QWidget *parent)
   hideUI();
 }
 
-
 void MainWindow::resizeEvent(QResizeEvent *event) {
   QMainWindow::resizeEvent(event);
-
-  int newWidth = renderWidget->width();
-  int newHeight = renderWidget->height();
-
-  renderWidget->resize(newWidth, newHeight);
-
-  if (m_videoPlayer) {
-     m_videoPlayer->GetDxHelper()->ResizeSwapChain(newWidth, newHeight);
-  }
 }
 
 void MainWindow::hideUI() {
@@ -72,15 +62,19 @@ void MainWindow::setupUI() {
 }
 
 void MainWindow::connectSignalsAndSlots() {
-  connect(ui->actionOpen_file, &QAction::triggered, this, &MainWindow::onFileOpen);
+  connect(ui->actionOpen_file, &QAction::triggered, this,
+          &MainWindow::onFileOpen);
   connect(ui->volumeSlider, &QSlider::valueChanged, this,
           &MainWindow::onVolumeChanged);
   QObject::connect(this->m_videoPlayer.data(), &VideoPlayer::positionChanged,
                    this, &MainWindow::onPositionChanged);
   connect(ui->slider, &QSlider::sliderMoved, this, &MainWindow::onSliderMoved);
-  connect(ui->slider, &QSlider::sliderPressed, this, &MainWindow::onSliderPressed);
-  connect(ui->slider, &QSlider::sliderReleased, this, &MainWindow::onSliderReleased);
-  connect(ui->playButton, &QPushButton::clicked, this, &MainWindow::onPlayPauseVideo);
+  connect(ui->slider, &QSlider::sliderPressed, this,
+          &MainWindow::onSliderPressed);
+  connect(ui->slider, &QSlider::sliderReleased, this,
+          &MainWindow::onSliderReleased);
+  connect(ui->playButton, &QPushButton::clicked, this,
+          &MainWindow::onPlayPauseVideo);
   connect(ui->soundButton, &QPushButton::clicked, this, &MainWindow::onMute);
 }
 
@@ -102,8 +96,8 @@ void MainWindow::onFileOpen() {
 }
 
 void MainWindow::onSliderMoved(const int &position) {
-  LONGLONG hnsPosition = static_cast<LONGLONG>(position);
-  m_videoPlayer->SetPosition(hnsPosition * 100);
+  LONGLONG hnsPosition = static_cast<LONGLONG>(position) * 100;
+  m_videoPlayer->SetPosition(hnsPosition);
 }
 
 void MainWindow::onPlayPauseVideo() {

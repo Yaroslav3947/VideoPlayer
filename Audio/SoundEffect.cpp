@@ -9,7 +9,8 @@ void SoundEffect::Initialize(ComPtr<IXAudio2> masteringEngine,
     return;
   }
 
-  masteringEngine->CreateSourceVoice(&m_sourceVoice, sourceFormat);
+  winrt::check_hresult(
+      masteringEngine->CreateSourceVoice(&m_sourceVoice, sourceFormat));
   m_audioAvailable = true;
 }
 
@@ -22,22 +23,22 @@ void SoundEffect::PlaySound(std::vector<byte> const& soundData) {
   }
 
   // Interrupt sound effect if it is currently playing.
-  m_sourceVoice->Stop();
-  m_sourceVoice->FlushSourceBuffers();
+  winrt::check_hresult(m_sourceVoice->Stop());
+  winrt::check_hresult(m_sourceVoice->FlushSourceBuffers());
 
   XAUDIO2_BUFFER buffer = {0};
   buffer.AudioBytes = (UINT32)m_soundData.size();
   buffer.pAudioData = m_soundData.data();
   buffer.Flags = XAUDIO2_END_OF_STREAM;
 
-  m_sourceVoice->SubmitSourceBuffer(&buffer);
-  m_sourceVoice->Start();
+  winrt::check_hresult(m_sourceVoice->SubmitSourceBuffer(&buffer));
+  winrt::check_hresult(m_sourceVoice->Start());
 }
 
 void SoundEffect::ChangeVolume(const float& volume) {
   if (m_audioAvailable) {
     m_volume = volume;
-    m_sourceVoice->SetVolume(volume);
+    winrt::check_hresult(m_sourceVoice->SetVolume(volume));
   }
 }
 

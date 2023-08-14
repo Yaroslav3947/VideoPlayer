@@ -7,7 +7,7 @@ void Audio::Initialize() {}
 void Audio::CreateDeviceIndependentResources() {
   UINT32 flags = 0;
 
-  XAudio2Create(m_musicEngine.GetAddressOf(), flags);
+  winrt::check_hresult(XAudio2Create(m_musicEngine.GetAddressOf(), flags));
 
 #if defined(_DEBUG)
   XAUDIO2_DEBUG_CONFIGURATION debugConfiguration = {0};
@@ -29,7 +29,7 @@ void Audio::CreateDeviceIndependentResources() {
   m_soundEffectEngine->SetDebugConfiguration(&debugConfiguration);
 #endif
 
-  m_soundEffectEngine->CreateMasteringVoice(&m_soundEffectMasteringVoice);
+  winrt::check_hresult(m_soundEffectEngine->CreateMasteringVoice(&m_soundEffectMasteringVoice));
 
   m_audioAvailable = true;
 }
@@ -47,7 +47,7 @@ void Audio::SuspendAudio() {
 
 void Audio::ResumeAudio() {
   if (m_audioAvailable) {
-    m_musicEngine->StartEngine();
-    m_soundEffectEngine->StartEngine();
+    winrt::check_hresult(m_musicEngine->StartEngine());
+    winrt::check_hresult(m_soundEffectEngine->StartEngine());
   }
 }

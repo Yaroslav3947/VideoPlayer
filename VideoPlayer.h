@@ -18,14 +18,17 @@ class VideoPlayer : public QObject,
   VideoPlayer(HWND& hwnd);
   virtual ~VideoPlayer();
 
-  HRESULT Initialize();
+  void Init();
+  void InitAudio();
+  void StartPlayback();
+  void InitAudioAndVideoTypes();
   void OpenURL(const WCHAR* sURL);
+  void InitReader(const WCHAR* sURL);
 
   // Playback
   void PlayPauseVideo();
 
-  void SetPosition(const LONGLONG& hnsPosition);
-  HRESULT ConfigureDecoder(DWORD dwStreamIndex);
+  void SetPosition(LONGLONG& hnsPosition);
 
   LONGLONG GetDuration();
   inline bool GetIsPaused() const { return m_isPaused; }

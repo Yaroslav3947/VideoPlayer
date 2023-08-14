@@ -28,14 +28,14 @@ void DXHelper::Init(HWND& hwnd) {
 
   D3D_FEATURE_LEVEL m_featureLevel;
 
-  HRESULT hr = D3D11CreateDeviceAndSwapChain(
+  winrt::check_hresult(D3D11CreateDeviceAndSwapChain(
       nullptr, D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_HARDWARE, nullptr, deviceFlags,
       levels, ARRAYSIZE(levels), D3D11_SDK_VERSION, &desc,
       m_swapChain.GetAddressOf(), m_device.GetAddressOf(), &m_featureLevel,
-      m_deviceContext.GetAddressOf());
+      m_deviceContext.GetAddressOf()));
 
-  D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(ID2D1Factory1),
-                    &m_factory);
+  winrt::check_hresult(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED,
+                                         __uuidof(ID2D1Factory1), &m_factory));
 
   D2D1_RENDER_TARGET_PROPERTIES renderTargetProps =
       D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_HARDWARE,
@@ -45,20 +45,20 @@ void DXHelper::Init(HWND& hwnd) {
   ComPtr<IDXGISurface> dxgiBackbuffer;
   m_swapChain->GetBuffer(0, IID_PPV_ARGS(&dxgiBackbuffer));
 
-  hr = m_factory->CreateDxgiSurfaceRenderTarget(
-      dxgiBackbuffer.Get(), &renderTargetProps, m_renderTarget.GetAddressOf());
+  winrt::check_hresult(m_factory->CreateDxgiSurfaceRenderTarget(
+      dxgiBackbuffer.Get(), &renderTargetProps, m_renderTarget.GetAddressOf()));
 }
 
 ComPtr<ID2D1Bitmap> DXHelper::CreateBitmapFromVideoSample(
     IMFSample* pSample, const UINT32& width, const UINT32& height) {
   ComPtr<IMFMediaBuffer> buffer;
-  HRESULT hr = pSample->ConvertToContiguousBuffer(&buffer);
+  winrt::check_hresult(pSample->ConvertToContiguousBuffer(&buffer));
 
   BYTE* data = nullptr;
   DWORD maxDataLength = 0;
   DWORD currentDataLength = 0;
 
-  hr = buffer->Lock(&data, &maxDataLength, &currentDataLength);
+  winrt::check_hresult(buffer->Lock(&data, &maxDataLength, &currentDataLength));
 
   UINT32 pitch = width * sizeof(UINT32);
 
@@ -68,18 +68,12 @@ ComPtr<ID2D1Bitmap> DXHelper::CreateBitmapFromVideoSample(
   bitmapProperties.pixelFormat.alphaMode = D2D1_ALPHA_MODE_IGNORE;
 
   ComPtr<ID2D1Bitmap> bitmap;
-  m_renderTarget->CreateBitmap(D2D1::SizeU(width, height), data, pitch,
-                               bitmapProperties, &bitmap);
+  winrt::check_hresult(m_renderTarget->CreateBitmap(
+      D2D1::SizeU(width, height), data, pitch, bitmapProperties, &bitmap));
 
-  buffer->Unlock();
+  winrt::check_hresult(buffer->Unlock());
 
   return bitmap;
-}
-
-void DXHelper::ResizeSwapChain(const UINT32& width, const UINT32& height) {
-  m_swapChain->ResizeBuffers(2, width, height, DXGI_FORMAT_UNKNOWN,
-                             DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH |
-                                 DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING);
 }
 
 void DXHelper::RenderBitmapOnWindow(ComPtr<ID2D1Bitmap> pBitmap) {
@@ -109,7 +103,7 @@ void DXHelper::RenderBitmapOnWindow(ComPtr<ID2D1Bitmap> pBitmap) {
 
   m_renderTarget->EndDraw();
 
-  m_swapChain->Present(1, 0);
+  winrt::check_hresult(m_swapChain->Present(1, 0));
 
   return;
 }

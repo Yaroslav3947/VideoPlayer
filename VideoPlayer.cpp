@@ -6,7 +6,7 @@ VideoPlayer::VideoPlayer(HWND &hwnd)
       m_reader(nullptr),
       m_mediaReader(nullptr),
       m_soundEffect(nullptr) {
-  Initialize();
+  Init();
 }
 
 //-----------------------------------------------------------------------------
@@ -43,83 +43,79 @@ ULONG VideoPlayer::Release() {
   return uCount;
 }
 
-HRESULT VideoPlayer::Initialize() {
-  HRESULT hr = MFStartup(MF_VERSION);
-  if (FAILED(hr)) {
-    return hr;
-  }
+void VideoPlayer::Init() {
+  winrt::check_hresult(MFStartup(MF_VERSION));
 
   m_dxhelper = std::make_unique<DXHelper>(m_hwnd);
-  if (m_dxhelper == nullptr) {
-    return E_FAIL;
-  }
-
   m_mediaReader = std::make_unique<MediaReader>();
-  if (m_mediaReader == nullptr) {
-    return E_FAIL;
-  }
-
   m_soundEffect = std::make_unique<SoundEffect>();
-  if (m_soundEffect == nullptr) {
-    return E_FAIL;
-  }
-
   m_audio = std::make_unique<Audio>();
-  if (m_audio == nullptr) {
-    return E_FAIL;
-  }
-
-  return S_OK;
 }
 
 void VideoPlayer::OpenURL(const WCHAR *sURL) {
   if (!sURL) return;
 
-  m_reader.Reset();
+  InitReader(sURL);
 
-  ComPtr<IMFAttributes> pAttributes;
-  HRESULT hr = MFCreateAttributes(pAttributes.GetAddressOf(), 1);
+  winrt::check_hresult(GetWidthAndHeight());
 
-  // Enable hardware transforms and video processing
-  hr = pAttributes->SetUINT32(MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS, TRUE);
-  hr = pAttributes->SetUINT32(MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, TRUE);
+  InitAudioAndVideoTypes();
 
-  // Set the asynchronous callback for the source reader
-  hr = pAttributes->SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK,
-                               static_cast<IMFSourceReaderCallback *>(this));
+  InitAudio();
+  StartPlayback();
 
-  hr = MFCreateSourceReaderFromURL(sURL, pAttributes.Get(),
-                                   m_reader.GetAddressOf());
+  return;
+}
 
-  hr = GetWidthAndHeight();
-
-  m_fps = GetFPS();
-
-  ComPtr<IMFMediaType> pAudioType;
-  hr = MFCreateMediaType(&pAudioType);
-
-  hr = pAudioType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);
-  hr = pAudioType->SetGUID(MF_MT_SUBTYPE, MFAudioFormat_PCM);
-
-  hr = m_reader->SetCurrentMediaType(0, nullptr, pAudioType.Get());
-
-  ComPtr<IMFMediaType> pVideoType;
-  hr = MFCreateMediaType(&pVideoType);
-
-  hr = pVideoType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
-  hr = pVideoType->SetGUID(MF_MT_SUBTYPE, MFVideoFormat_RGB32);
-
-  hr = m_reader->SetCurrentMediaType(1, nullptr, pVideoType.Get());
-
+void VideoPlayer::InitAudio() {
   m_audio->CreateDeviceIndependentResources();
 
   m_soundEffect->Initialize(m_audio->SoundEffectEngine(),
                             m_mediaReader->GetWaveFormat(m_reader));
+}
 
+void VideoPlayer::StartPlayback() {
   m_reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, 0, nullptr, nullptr,
                        nullptr, nullptr);
+}
 
-  return;
+void VideoPlayer::InitReader(const WCHAR *sURL) {
+  m_reader.Reset();
+
+  ComPtr<IMFAttributes> pAttributes;
+  winrt::check_hresult(MFCreateAttributes(pAttributes.GetAddressOf(), 1));
+
+  // Enable hardware transforms and video processing
+  pAttributes->SetUINT32(MF_READWRITE_ENABLE_HARDWARE_TRANSFORMS, TRUE);
+  pAttributes->SetUINT32(MF_SOURCE_READER_ENABLE_VIDEO_PROCESSING, TRUE);
+
+  // Set the asynchronous callback for the source reader
+  winrt::check_hresult(
+      pAttributes->SetUnknown(MF_SOURCE_READER_ASYNC_CALLBACK,
+                              static_cast<IMFSourceReaderCallback *>(this)));
+
+  winrt::check_hresult(MFCreateSourceReaderFromURL(sURL, pAttributes.Get(),
+                                                   m_reader.GetAddressOf()));
+}
+
+void VideoPlayer::InitAudioAndVideoTypes() {
+  ComPtr<IMFMediaType> pAudioType;
+  winrt::check_hresult(MFCreateMediaType(&pAudioType));
+
+  pAudioType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);
+  pAudioType->SetGUID(MF_MT_SUBTYPE, MFAudioFormat_PCM);
+
+  winrt::check_hresult(
+      m_reader->SetCurrentMediaType(0, nullptr, pAudioType.Get()));
+
+  ComPtr<IMFMediaType> pVideoType;
+  MFCreateMediaType(&pVideoType);
+
+  pVideoType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Video);
+  pVideoType->SetGUID(MF_MT_SUBTYPE, MFVideoFormat_RGB32);
+
+  winrt::check_hresult(
+      m_reader->SetCurrentMediaType(1, nullptr, pVideoType.Get()));
 }
 
 void VideoPlayer::PlayPauseVideo() {
@@ -149,7 +145,7 @@ LONGLONG VideoPlayer::GetDuration() {
   return duration;
 }
 
-void VideoPlayer::SetPosition(const LONGLONG &hnsNewPosition) {
+void VideoPlayer::SetPosition(LONGLONG &hnsNewPosition) {
   if (!m_reader) return;
 
   PROPVARIANT var;
@@ -159,6 +155,7 @@ void VideoPlayer::SetPosition(const LONGLONG &hnsNewPosition) {
 
   m_reader->SetCurrentPosition(GUID_NULL, var);
 
+  
   PropVariantClear(&var);
 }
 
@@ -181,10 +178,10 @@ float VideoPlayer::GetFPS() {
   HRESULT hr = m_reader->GetCurrentMediaType(1, &pMediaType);
   if (SUCCEEDED(hr)) {
     UINT32 numerator, denominator;
-    hr = MFGetAttributeRatio(pMediaType.Get(), MF_MT_FRAME_RATE, &numerator,
-                             &denominator);
+    winrt::check_hresult(MFGetAttributeRatio(pMediaType.Get(), MF_MT_FRAME_RATE,
+                                             &numerator, &denominator));
 
-    if (SUCCEEDED(hr) && denominator > 0) {
+    if (denominator > 0) {
       return static_cast<float>(numerator) / static_cast<float>(denominator);
     }
   }
@@ -219,8 +216,9 @@ HRESULT VideoPlayer::OnReadSample(HRESULT hr, DWORD dwStreamIndex,
     m_soundEffect->PlaySound(soundData);
   }
 
-  hr = m_reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, 0, NULL, NULL, NULL,
-                            NULL);
+  winrt::check_hresult(m_reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, 0, NULL,
+                                           NULL, NULL,
+                            NULL));
 
   return S_OK;
 }

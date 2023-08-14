@@ -20,5 +20,6 @@
 #include <xaudio2.h>
 
 #include <wrl/client.h>
+#include <winrt/base.h>
 
 using Microsoft::WRL::ComPtr;
