@@ -171,7 +171,7 @@ QPushButton:hover {
     </property>
     <property name="icon">
      <iconset>
-      <normaloff>Resources/icons/volume-high.png</normaloff>Resources/icons/volume-high.png</iconset>
+      <normaloff>Resources/icons/volume-unmute.png</normaloff>Resources/icons/volume-unmute.png</iconset>
     </property>
    </widget>
   </widget>
