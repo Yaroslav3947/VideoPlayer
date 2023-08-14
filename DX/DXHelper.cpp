@@ -1,10 +1,6 @@
 #include "DXHelper.h"
 
-#include <algorithm>
-
-DXHelper::DXHelper(HWND& hwnd) : m_hwnd(hwnd) {
-  Init(hwnd);
-}
+DXHelper::DXHelper(HWND& hwnd) : m_hwnd(hwnd) { Init(hwnd); }
 
 void DXHelper::Init(HWND& hwnd) {
   DXGI_SWAP_CHAIN_DESC desc = {};
@@ -53,9 +49,8 @@ void DXHelper::Init(HWND& hwnd) {
       dxgiBackbuffer.Get(), &renderTargetProps, m_renderTarget.GetAddressOf());
 }
 
-ComPtr<ID2D1Bitmap> DXHelper::CreateBitmapFromVideoSample(IMFSample* pSample,
-                                                          const UINT32& width,
-                                                          const UINT32& height) {
+ComPtr<ID2D1Bitmap> DXHelper::CreateBitmapFromVideoSample(
+    IMFSample* pSample, const UINT32& width, const UINT32& height) {
   ComPtr<IMFMediaBuffer> buffer;
   HRESULT hr = pSample->ConvertToContiguousBuffer(&buffer);
 
@@ -81,16 +76,16 @@ ComPtr<ID2D1Bitmap> DXHelper::CreateBitmapFromVideoSample(IMFSample* pSample,
   return bitmap;
 }
 
-//void DXHelper::ResizeSwapChain(const UINT32& width, const UINT32& height) {
-//  m_swapChain->ResizeBuffers(2, width, height, DXGI_FORMAT_UNKNOWN,
-//                             DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH |
-//                                 DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING);
-//}
+void DXHelper::ResizeSwapChain(const UINT32& width, const UINT32& height) {
+  m_swapChain->ResizeBuffers(2, width, height, DXGI_FORMAT_UNKNOWN,
+                             DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH |
+                                 DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING);
+}
 
 void DXHelper::RenderBitmapOnWindow(ComPtr<ID2D1Bitmap> pBitmap) {
   m_renderTarget->BeginDraw();
   m_renderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
-  m_renderTarget->Clear(D2D1::ColorF(D2D1::ColorF::MediumPurple));
+  m_renderTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
 
   D2D1_SIZE_F renderTargetSize = m_renderTarget->GetSize();
   D2D1_SIZE_F bitmapSize = pBitmap->GetSize();
@@ -118,4 +113,3 @@ void DXHelper::RenderBitmapOnWindow(ComPtr<ID2D1Bitmap> pBitmap) {
 
   return;
 }
-

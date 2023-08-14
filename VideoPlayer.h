@@ -2,16 +2,15 @@
 
 #include <QObject>
 
-#include "WinInclude.h"
-
 #include "Audio/Audio.h"
 #include "Audio/MediaReader.h"
 #include "Audio/SoundEffect.h"
-
 #include "DX/DXHelper.h"
+#include "WinInclude.h"
 
-
-class VideoPlayer : public QObject, public IMFAsyncCallback, public IMFSourceReaderCallback {
+class VideoPlayer : public QObject,
+                    public IMFAsyncCallback,
+                    public IMFSourceReaderCallback {
   Q_OBJECT
  public:
   using Ptr = QSharedPointer<VideoPlayer>;
@@ -37,9 +36,9 @@ class VideoPlayer : public QObject, public IMFAsyncCallback, public IMFSourceRea
  signals:
   void positionChanged(qint64 position);
 
-  private:
+ private:
   HRESULT GetWidthAndHeight();
-   float GetFPS();
+  float GetFPS();
 
  protected:
   // IUnknown methods
@@ -58,7 +57,6 @@ class VideoPlayer : public QObject, public IMFAsyncCallback, public IMFSourceRea
                        LONGLONG llTimestamp, IMFSample* pSample) override;
 
  private:
-
   ComPtr<IMFSourceReader> m_reader;
   std::unique_ptr<DXHelper> m_dxhelper;
   std::unique_ptr<MediaReader> m_mediaReader;

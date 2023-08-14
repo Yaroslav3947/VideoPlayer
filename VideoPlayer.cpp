@@ -127,8 +127,8 @@ void VideoPlayer::PlayPauseVideo() {
 
   if (!m_isPaused) {
     m_audio->ResumeAudio();
-    m_reader->ReadSample(m_videoStreamIndex, 0, nullptr, nullptr,
-                         nullptr, nullptr);
+    m_reader->ReadSample(m_videoStreamIndex, 0, nullptr, nullptr, nullptr,
+                         nullptr);
   } else {
     m_audio->SuspendAudio();
   }
@@ -205,7 +205,6 @@ HRESULT VideoPlayer::OnReadSample(HRESULT hr, DWORD dwStreamIndex,
   }
 
   m_videoStreamIndex = dwStreamIndex;
-
 
   if (dwStreamIndex == 1) {
     ComPtr<ID2D1Bitmap> bitmap;

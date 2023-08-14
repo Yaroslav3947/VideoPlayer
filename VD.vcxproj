@@ -124,6 +124,8 @@
     <Image Include="Resources\icons\media-stop.png" />
     <Image Include="Resources\icons\menu.png" />
     <Image Include="Resources\icons\volume-high.png" />
+    <Image Include="Resources\icons\volume-mute.png" />
+    <Image Include="Resources\icons\volume-unmute.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

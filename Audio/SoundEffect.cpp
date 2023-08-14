@@ -1,6 +1,6 @@
 #include "SoundEffect.h"
 
-SoundEffect::SoundEffect() : m_audioAvailable(false) {}
+SoundEffect::SoundEffect() : m_audioAvailable(false), m_volume{1.0} {}
 
 void SoundEffect::Initialize(ComPtr<IXAudio2> masteringEngine,
                              WAVEFORMATEX* sourceFormat) {
@@ -36,6 +36,10 @@ void SoundEffect::PlaySound(std::vector<byte> const& soundData) {
 
 void SoundEffect::ChangeVolume(const float& volume) {
   if (m_audioAvailable) {
+    m_volume = volume;
     m_sourceVoice->SetVolume(volume);
   }
 }
+
+void SoundEffect::Mute() { ChangeVolume(0.0); }
+void SoundEffect::Unmute() { ChangeVolume(1.0); }

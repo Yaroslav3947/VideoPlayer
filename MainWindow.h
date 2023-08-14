@@ -35,10 +35,14 @@ class MainWindow : public QMainWindow {
   std::unique_ptr<DXHelper> m_dxhelper;
   VideoPlayer::Ptr m_videoPlayer;
 
+ private:
+  QWidget *renderWidget;
+
  protected:
   void resizeEvent(QResizeEvent *event) override;
 
  private slots:
+  void onMute();
   void onFileOpen();
   void onVolumeChanged(const int &value);
   void onPlayPauseVideo();

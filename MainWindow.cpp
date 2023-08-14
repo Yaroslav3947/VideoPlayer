@@ -5,10 +5,30 @@ MainWindow::MainWindow(QWidget *parent)
   ui->setupUi(this);
 
   setWindowTitle("Video Player");
-  resize(1920, 1080);
+  resize(1600, 900);
 
-  ui->renderWidget->setBaseSize(1280, 720);
-  HWND hwnd = reinterpret_cast<HWND>(ui->renderWidget->winId());
+  renderWidget = new QWidget(this);
+  renderWidget->setStyleSheet("background-color: black;");
+  renderWidget->resize(1586, 828);
+
+  QBoxLayout *renderLayout = new QVBoxLayout();
+  renderLayout->addWidget(renderWidget);
+
+  QBoxLayout *mainLayout = new QVBoxLayout(ui->centralWidget);
+  renderWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+ 
+  QHBoxLayout *bottomMenuLayout = new QHBoxLayout();
+  bottomMenuLayout->addWidget(ui->playButton);  
+  bottomMenuLayout->addWidget(ui->soundButton);  
+  bottomMenuLayout->addWidget(ui->currentContentDuration);  
+  bottomMenuLayout->addWidget(ui->slider);
+
+  mainLayout->addLayout(renderLayout);
+  mainLayout->addLayout(bottomMenuLayout);
+
+  ui->centralWidget->setLayout(mainLayout);
+
+  HWND hwnd = reinterpret_cast<HWND>(renderWidget->winId());
   m_videoPlayer = QSharedPointer<VideoPlayer>::create(hwnd);
 
   connectSignalsAndSlots();
@@ -16,33 +36,34 @@ MainWindow::MainWindow(QWidget *parent)
   hideUI();
 }
 
+
 void MainWindow::resizeEvent(QResizeEvent *event) {
   QMainWindow::resizeEvent(event);
 
-  
-  int newWidth = ui->renderWidget->width();
-  int newHeight =
-      static_cast<int>(newWidth * (9.0 / 16.0));
+  int newWidth = renderWidget->width();
+  int newHeight = renderWidget->height();
 
-  ui->renderWidget->setFixedSize(newWidth, newHeight);
+  renderWidget->resize(newWidth, newHeight);
 
   if (m_videoPlayer) {
-    //m_videoPlayer->GetDxHelper()->ResizeSwapChain(newWidth, newHeight);
+     m_videoPlayer->GetDxHelper()->ResizeSwapChain(newWidth, newHeight);
   }
-  qDebug() << "Changed" << newWidth << newHeight;
 }
 
 void MainWindow::hideUI() {
   ui->slider->hide();
   ui->playButton->hide();
+  ui->soundButton->hide();
   ui->volumeSlider->hide();
   ui->currentContentDuration->hide();
 }
 
 void MainWindow::setupUI() {
   const int maxVolumeSliderValue = 10;
+
   ui->slider->show();
   ui->playButton->show();
+  ui->soundButton->show();
   ui->volumeSlider->show();
   ui->currentContentDuration->show();
 
@@ -60,6 +81,7 @@ void MainWindow::connectSignalsAndSlots() {
   connect(ui->slider, &QSlider::sliderPressed, this, &MainWindow::onSliderPressed);
   connect(ui->slider, &QSlider::sliderReleased, this, &MainWindow::onSliderReleased);
   connect(ui->playButton, &QPushButton::clicked, this, &MainWindow::onPlayPauseVideo);
+  connect(ui->soundButton, &QPushButton::clicked, this, &MainWindow::onMute);
 }
 
 void MainWindow::onFileOpen() {
@@ -114,6 +136,16 @@ void MainWindow::onVolumeChanged(const int &value) {
   float volume = static_cast<float>(value) /
                  static_cast<float>(ui->volumeSlider->maximum());
   m_videoPlayer->GetSoundEffect()->ChangeVolume(volume);
+}
+
+void MainWindow::onMute() {
+  if (m_videoPlayer->GetSoundEffect()->IsMute()) {
+    m_videoPlayer->GetSoundEffect()->Unmute();
+    ui->soundButton->setIcon(QIcon("Resources/icons/volume-unmute.png"));
+  } else {
+    ui->soundButton->setIcon(QIcon("Resources/icons/volume-mute.png"));
+    m_videoPlayer->GetSoundEffect()->Mute();
+  }
 }
 
 void MainWindow::updateDurationInfo(const qint64 &currentPosition) {
