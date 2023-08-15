@@ -4,6 +4,8 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindowClass) {
   ui->setupUi(this);
 
+  installEventFilter(this);
+
   setWindowTitle("Video Player");
   resize(1600, 900);
 
@@ -14,10 +16,10 @@ MainWindow::MainWindow(QWidget *parent)
   QBoxLayout *renderLayout = new QVBoxLayout();
   renderLayout->addWidget(renderWidget);
 
-  QBoxLayout *mainLayout = new QVBoxLayout(ui->centralWidget);
+  mainLayout = new QVBoxLayout(ui->centralWidget);
   renderWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-  QHBoxLayout *bottomMenuLayout = new QHBoxLayout();
+  bottomMenuLayout = new QHBoxLayout();
   bottomMenuLayout->addWidget(ui->playButton);
   bottomMenuLayout->addWidget(ui->soundButton);
   bottomMenuLayout->addWidget(ui->currentContentDuration);
@@ -33,11 +35,32 @@ MainWindow::MainWindow(QWidget *parent)
 
   connectSignalsAndSlots();
 
-  hideUI();
+  
+  //hideUI();
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event) {
   QMainWindow::resizeEvent(event);
+}
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
+  if (obj == this && event->type() == QEvent::KeyPress) {
+    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+    if (keyEvent->key() == Qt::Key_F11) {
+      if (isFullScreen()) {
+        showNormal();
+        menuBar()->show();
+        mainLayout->addLayout(bottomMenuLayout);
+      } else {
+        menuBar()->hide();
+        showFullScreen();
+        mainLayout->removeItem(bottomMenuLayout);
+        renderWidget->resize(1920, 1080);
+      }
+      return true;
+    }
+  }
+  return QMainWindow::eventFilter(obj, event);
 }
 
 void MainWindow::hideUI() {
@@ -80,6 +103,7 @@ void MainWindow::connectSignalsAndSlots() {
   connect(ui->playButton, &QPushButton::clicked, this,
           &MainWindow::onPlayPauseVideo);
   connect(ui->soundButton, &QPushButton::clicked, this, &MainWindow::onMute);
+
 }
 
 void MainWindow::onEndOfStream() {

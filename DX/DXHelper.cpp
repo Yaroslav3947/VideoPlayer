@@ -4,8 +4,8 @@ DXHelper::DXHelper(HWND& hwnd) : m_hwnd(hwnd) { Init(hwnd); }
 
 void DXHelper::Init(HWND& hwnd) {
   DXGI_SWAP_CHAIN_DESC desc = {};
-  desc.BufferDesc.Width = 0;
-  desc.BufferDesc.Height = 0;
+  desc.BufferDesc.Width = 1920;
+  desc.BufferDesc.Height = 1080;
   desc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
   desc.BufferDesc.RefreshRate.Numerator = 0;
   desc.BufferDesc.RefreshRate.Denominator = 0;
