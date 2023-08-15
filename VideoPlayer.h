@@ -28,7 +28,7 @@ class VideoPlayer : public QObject,
   // Playback
   void PlayPauseVideo();
 
-  void SetPosition(LONGLONG& hnsPosition);
+  void SetPosition(const LONGLONG& hnsPosition);
 
   LONGLONG GetDuration();
   inline bool GetIsPaused() const { return m_isPaused; }
@@ -38,6 +38,7 @@ class VideoPlayer : public QObject,
 
  signals:
   void positionChanged(qint64 position);
+  void endOfStream();
 
  private:
   HRESULT GetWidthAndHeight();

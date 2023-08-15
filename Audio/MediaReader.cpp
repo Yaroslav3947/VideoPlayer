@@ -1,8 +1,6 @@
 #include "MediaReader.h"
 
 std::vector<byte> MediaReader::LoadMedia(ComPtr<IMFSample> pSample) {
-  std::vector<byte> fileData;
-
   ComPtr<IMFMediaBuffer> mediaBuffer;
   winrt::check_hresult(
       pSample->ConvertToContiguousBuffer(mediaBuffer.GetAddressOf()));
@@ -13,8 +11,9 @@ std::vector<byte> MediaReader::LoadMedia(ComPtr<IMFSample> pSample) {
   winrt::check_hresult(
       mediaBuffer->Lock(&audioData, nullptr, &sampleBufferLength));
 
-  fileData.resize(sampleBufferLength);
-  std::copy(audioData, audioData + sampleBufferLength, fileData.begin());
+  std::vector<byte> fileData(sampleBufferLength);
+  memcpy(fileData.data(), audioData, sampleBufferLength);
+
   winrt::check_hresult(mediaBuffer->Unlock());
 
   return fileData;

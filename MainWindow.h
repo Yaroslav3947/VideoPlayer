@@ -44,10 +44,11 @@ class MainWindow : public QMainWindow {
  private slots:
   void onMute();
   void onFileOpen();
-  void onVolumeChanged(const int &value);
-  void onPlayPauseVideo();
+  void onEndOfStream();
   void onSliderPressed();
+  void onPlayPauseVideo();
   void onSliderReleased();
+  void onVolumeChanged(const int &value);
   void onSliderMoved(const int &position);
   void updateDurationInfo(const qint64 &currentPosition);
   void onPositionChanged(const qint64 &currentPosition);

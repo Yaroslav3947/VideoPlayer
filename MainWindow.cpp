@@ -54,7 +54,7 @@ void MainWindow::setupUI() {
   ui->slider->show();
   ui->playButton->show();
   ui->soundButton->show();
-  //ui->volumeSlider->show();
+  ui->volumeSlider->show();
   ui->currentContentDuration->show();
 
   ui->volumeSlider->setRange(0, maxVolumeSliderValue);
@@ -68,6 +68,10 @@ void MainWindow::connectSignalsAndSlots() {
           &MainWindow::onVolumeChanged);
   QObject::connect(this->m_videoPlayer.data(), &VideoPlayer::positionChanged,
                    this, &MainWindow::onPositionChanged);
+  
+  QObject::connect(this->m_videoPlayer.data(), &VideoPlayer::endOfStream,
+                   this, &MainWindow::onEndOfStream);
+
   connect(ui->slider, &QSlider::sliderMoved, this, &MainWindow::onSliderMoved);
   connect(ui->slider, &QSlider::sliderPressed, this,
           &MainWindow::onSliderPressed);
@@ -76,6 +80,13 @@ void MainWindow::connectSignalsAndSlots() {
   connect(ui->playButton, &QPushButton::clicked, this,
           &MainWindow::onPlayPauseVideo);
   connect(ui->soundButton, &QPushButton::clicked, this, &MainWindow::onMute);
+}
+
+void MainWindow::onEndOfStream() {
+  ui->playButton->setIcon(QIcon("Resources/icons/media-play.png"));
+
+  m_videoPlayer->SetPosition(0);  
+  m_videoPlayer->PlayPauseVideo();  
 }
 
 void MainWindow::onFileOpen() {
@@ -96,8 +107,8 @@ void MainWindow::onFileOpen() {
 }
 
 void MainWindow::onSliderMoved(const int &position) {
-  LONGLONG hnsPosition = static_cast<LONGLONG>(position) * 100;
-  m_videoPlayer->SetPosition(hnsPosition);
+  qint64 hnsPosition = static_cast<qint64>(position);
+  m_videoPlayer->SetPosition(hnsPosition * 100);
 }
 
 void MainWindow::onPlayPauseVideo() {
@@ -118,11 +129,12 @@ void MainWindow::onSliderPressed() {
 void MainWindow::onSliderReleased() {
   if (m_videoPlayer->GetIsPaused()) {
     m_videoPlayer->PlayPauseVideo();
+    ui->playButton->setIcon(QIcon("Resources/icons/media-pause.png"));
   }
 }
 
 void MainWindow::onPositionChanged(const qint64 &currentPosition) {
-  ui->slider->setValue(currentPosition);
+  ui->slider->setValue(static_cast<int>(currentPosition));
   updateDurationInfo(currentPosition * 100);
 }
 

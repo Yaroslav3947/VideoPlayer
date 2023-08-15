@@ -123,11 +123,9 @@ void VideoPlayer::PlayPauseVideo() {
   m_isPaused = !m_isPaused;
 
   if (!m_isPaused) {
-    m_audio->ResumeAudio();
-    m_reader->ReadSample(m_streamIndex, 0, nullptr, nullptr, nullptr,
+    m_reader->ReadSample(MF_SOURCE_READER_ANY_STREAM, 0, nullptr, nullptr,
+                         nullptr,
                          nullptr);
-  } else {
-    m_audio->SuspendAudio();
   }
 }
 
@@ -146,7 +144,7 @@ LONGLONG VideoPlayer::GetDuration() {
   return duration;
 }
 
-void VideoPlayer::SetPosition(LONGLONG &hnsNewPosition) {
+void VideoPlayer::SetPosition(const LONGLONG &hnsNewPosition) {
   if (!m_reader) return;
   
   PROPVARIANT var;
@@ -156,6 +154,7 @@ void VideoPlayer::SetPosition(LONGLONG &hnsNewPosition) {
 
   //winrt::check_hresult(m_reader->SetCurrentPosition(GUID_NULL, var));
   m_reader->SetCurrentPosition(GUID_NULL, var);
+
   
   PropVariantClear(&var);
 }
@@ -178,7 +177,7 @@ float VideoPlayer::GetFPS() {
   ComPtr<IMFMediaType> pMediaType = nullptr;
   HRESULT hr = m_reader->GetCurrentMediaType(1, &pMediaType);
   if (SUCCEEDED(hr)) {
-    UINT32 numerator, denominator;
+    UINT32 numerator{0}, denominator{0};
     winrt::check_hresult(MFGetAttributeRatio(pMediaType.Get(), MF_MT_FRAME_RATE,
                                              &numerator, &denominator));
 
@@ -198,7 +197,7 @@ HRESULT VideoPlayer::OnReadSample(HRESULT hr, DWORD dwStreamIndex,
   }
 
   if (dwStreamFlags & MF_SOURCE_READERF_ENDOFSTREAM) {
-    m_audio->SuspendAudio();
+    emit endOfStream();
     return S_OK;
   }
 
