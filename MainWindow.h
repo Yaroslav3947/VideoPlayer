@@ -1,9 +1,12 @@
 #pragma once
 
-#include <QFileDialog>
-#include <QMenuBar>
+#include <QEvent>
 #include <QTimer>
+#include <QMenuBar>
+#include <QKeyEvent>
 #include <QVBoxLayout>
+#include <QMouseEvent>
+#include <QFileDialog>
 #include <QtWidgets/QMainWindow>
 
 
@@ -16,6 +19,7 @@ namespace Ui {
 class MainWindowClass;
 };
 QT_END_NAMESPACE
+
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -37,9 +41,12 @@ class MainWindow : public QMainWindow {
 
  private:
   QWidget *renderWidget;
+  QHBoxLayout *bottomMenuLayout;
+  QBoxLayout *mainLayout;
 
  protected:
   void resizeEvent(QResizeEvent *event) override;
+  bool eventFilter(QObject *obj, QEvent *event) override;
 
  private slots:
   void onMute();
