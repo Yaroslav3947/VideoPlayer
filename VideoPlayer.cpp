@@ -192,6 +192,9 @@ float VideoPlayer::GetFPS() {
 HRESULT VideoPlayer::OnReadSample(HRESULT hr, DWORD dwStreamIndex,
                                   DWORD dwStreamFlags, LONGLONG llTimestamp,
                                   IMFSample *pSample) {
+
+  std::lock_guard<std::mutex> lock(GetDxHelper()->GetResizeMtx());
+
   if (m_isPaused) {
     return S_OK;
   }

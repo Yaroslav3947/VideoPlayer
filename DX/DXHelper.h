@@ -13,10 +13,15 @@ class DXHelper {
   ComPtr<ID2D1Bitmap> CreateBitmapFromVideoSample(IMFSample* pSample,
                                                   const UINT32& width,
                                                   const UINT32& height);
+  void ResizeRenderTarget(const UINT32& width, const UINT32& height);
 
+  std::mutex& GetResizeMtx() { return m_resize_mtx; }
 
  private:
   HWND m_hwnd;
+
+  std::mutex m_resize_mtx;
+
   ComPtr<ID3D11Device> m_device;
   ComPtr<ID3D11DeviceContext> m_deviceContext;
   ComPtr<IDXGISwapChain> m_swapChain;

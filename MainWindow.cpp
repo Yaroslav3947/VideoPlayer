@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
 
   renderWidget = new QWidget(this);
   renderWidget->setStyleSheet("background-color: black;");
-  renderWidget->resize(1586, 828);
+  renderWidget->resize(1581, 828);
 
   QBoxLayout *renderLayout = new QVBoxLayout();
   renderLayout->addWidget(renderWidget);
@@ -35,12 +35,15 @@ MainWindow::MainWindow(QWidget *parent)
 
   connectSignalsAndSlots();
 
-  
-  //hideUI();
+  hideUI();
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event) {
   QMainWindow::resizeEvent(event);
+
+  UINT32 newWidth = renderWidget->width();
+  UINT32 newHeight = renderWidget->height();
+  m_videoPlayer->GetDxHelper()->ResizeRenderTarget(newWidth, newHeight);
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
@@ -77,7 +80,7 @@ void MainWindow::setupUI() {
   ui->slider->show();
   ui->playButton->show();
   ui->soundButton->show();
-  ui->volumeSlider->show();
+  //ui->volumeSlider->show();
   ui->currentContentDuration->show();
 
   ui->volumeSlider->setRange(0, maxVolumeSliderValue);

@@ -76,34 +76,62 @@ ComPtr<ID2D1Bitmap> DXHelper::CreateBitmapFromVideoSample(
   return bitmap;
 }
 
+void DXHelper::ResizeRenderTarget(const UINT32& width, const UINT32& height) {
+  std::lock_guard<std::mutex> lock(m_resize_mtx);
+
+  if (m_renderTarget) {
+    m_renderTarget.Reset();
+  }
+
+  winrt::check_hresult(m_swapChain->ResizeBuffers(
+      2, width, height, DXGI_FORMAT_B8G8R8A8_UNORM, 0));
+
+  ComPtr<IDXGISurface> dxgiBackbuffer;
+  winrt::check_hresult(
+      m_swapChain->GetBuffer(0, IID_PPV_ARGS(&dxgiBackbuffer)));
+
+  D2D1_RENDER_TARGET_PROPERTIES renderTargetProps =
+      D2D1::RenderTargetProperties(D2D1_RENDER_TARGET_TYPE_HARDWARE,
+                                   D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM,
+                                                     D2D1_ALPHA_MODE_IGNORE));
+
+  winrt::check_hresult(m_factory->CreateDxgiSurfaceRenderTarget(
+      dxgiBackbuffer.Get(), &renderTargetProps, m_renderTarget.GetAddressOf()));
+}
+
 void DXHelper::RenderBitmapOnWindow(ComPtr<ID2D1Bitmap> pBitmap) {
   m_renderTarget->BeginDraw();
   m_renderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
-  m_renderTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
+  m_renderTarget->Clear(D2D1::ColorF(D2D1::ColorF::Black));
 
-  D2D1_SIZE_F renderTargetSize = m_renderTarget->GetSize();
-  D2D1_SIZE_F bitmapSize = pBitmap->GetSize();
+  D2D1_SIZE_F window = m_renderTarget->GetSize();
+  D2D1_SIZE_F picture = pBitmap->GetSize();
 
-  float scaleX = renderTargetSize.width / bitmapSize.width;
-  float scaleY = renderTargetSize.height / bitmapSize.height;
+  float windowAR = window.width / window.height;
+  float pictureAR = picture.width / picture.height;
 
-  float scale = min(scaleX, scaleY);
+  float left = 0.0f, top = 0.0f, right = 0.0f, bottom = 0.0f;
+  float scale = 0.0f;
 
-  D2D1_SIZE_F scaledBitmapSize = {bitmapSize.width * scale,
-                                  bitmapSize.height * scale};
+  if (windowAR > pictureAR) {
+    scale = window.height / 1080.0f;
+    float newWidth = 1920 * scale;
+    left = (window.width - newWidth) * 0.5f;
+    right = left + newWidth;
+    bottom = window.height;
+  } else {
+    scale = window.width / 1920.0f;
+    float newHeight = scale * 1080;
+    top = (window.height - newHeight) * 0.5f;
+    bottom = top + newHeight;
+    right = window.width;
+  }
 
-  D2D1_POINT_2F upperLeftCorner =
-      D2D1::Point2F((renderTargetSize.width - scaledBitmapSize.width) / 2.f,
-                    (renderTargetSize.height - scaledBitmapSize.height) / 2.f);
+  D2D1_RECT_F destinationRect = D2D1::RectF(left, top, right, bottom);
 
-  m_renderTarget->DrawBitmap(
-      pBitmap.Get(), D2D1::RectF(upperLeftCorner.x, upperLeftCorner.y,
-                                 upperLeftCorner.x + scaledBitmapSize.width,
-                                 upperLeftCorner.y + scaledBitmapSize.height));
+  m_renderTarget->DrawBitmap(pBitmap.Get(), destinationRect);
 
   m_renderTarget->EndDraw();
 
   winrt::check_hresult(m_swapChain->Present(1, 0));
-
-  return;
 }
