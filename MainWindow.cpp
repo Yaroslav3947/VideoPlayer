@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
 
   renderWidget = new QWidget(this);
   renderWidget->setStyleSheet("background-color: black;");
-  renderWidget->resize(1586, 828);
+  renderWidget->resize(1581, 828);
 
   QBoxLayout *renderLayout = new QVBoxLayout();
   renderLayout->addWidget(renderWidget);
@@ -41,6 +41,11 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::resizeEvent(QResizeEvent *event) {
   QMainWindow::resizeEvent(event);
+
+  m_videoPlayer->GetDxHelper()->ChangeSize(renderWidget->width(),
+                                           renderWidget->height());
+
+  qDebug() << renderWidget->width() << renderWidget->height();
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
