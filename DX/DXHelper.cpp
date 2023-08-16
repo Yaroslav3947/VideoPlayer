@@ -76,7 +76,8 @@ ComPtr<ID2D1Bitmap> DXHelper::CreateBitmapFromVideoSample(
   return bitmap;
 }
 
-void DXHelper::ChangeSize(UINT32 width, UINT32 height) {
+void DXHelper::ResizeRenderTarget(const UINT32& width, const UINT32& height) {
+  std::lock_guard<std::mutex> lock(m_resize_mtx);
 
   if (m_renderTarget) {
     m_renderTarget.Reset();
@@ -96,51 +97,35 @@ void DXHelper::ChangeSize(UINT32 width, UINT32 height) {
 
   winrt::check_hresult(m_factory->CreateDxgiSurfaceRenderTarget(
       dxgiBackbuffer.Get(), &renderTargetProps, m_renderTarget.GetAddressOf()));
-
-  //// TODO: change logic, recreation of renderTarget => error
 }
 
 void DXHelper::RenderBitmapOnWindow(ComPtr<ID2D1Bitmap> pBitmap) {
   m_renderTarget->BeginDraw();
   m_renderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
-  m_renderTarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
+  m_renderTarget->Clear(D2D1::ColorF(D2D1::ColorF::Black));
 
-  D2D1_SIZE_F windowSize = m_renderTarget->GetSize();
-  D2D1_SIZE_F pictureSize = pBitmap->GetSize();
+  D2D1_SIZE_F window = m_renderTarget->GetSize();
+  D2D1_SIZE_F picture = pBitmap->GetSize();
 
+  float windowAR = window.width / window.height;
+  float pictureAR = picture.width / picture.height;
 
-  float windowAR = windowSize.width / windowSize.height;
-
-  float pictureAR = pictureSize.width / pictureSize.height;
-
-  float left{0.0}, top{0.0}, right{0.0}, bottom{0.0};
+  float left = 0.0f, top = 0.0f, right = 0.0f, bottom = 0.0f;
+  float scale = 0.0f;
 
   if (windowAR > pictureAR) {
-    float scale = windowSize.height / 1080;
-
+    scale = window.height / 1080.0f;
     float newWidth = 1920 * scale;
-    float newHeight = windowSize.height;
-
-     left = (windowSize.width - newWidth) / 2.0f;
-     top = 0;
-     right = left + newWidth;
-     bottom = windowSize.height;
+    left = (window.width - newWidth) * 0.5f;
+    right = left + newWidth;
+    bottom = window.height;
   } else {
-    float scale = windowSize.width / 1920;
-
-    float newWidth = windowSize.width;
+    scale = window.width / 1920.0f;
     float newHeight = scale * 1080;
-
-     left = 0;
-     top = (windowSize.height - newHeight) / 2.0f;
-     right = windowSize.width;
-     bottom = top + newHeight;
+    top = (window.height - newHeight) * 0.5f;
+    bottom = top + newHeight;
+    right = window.width;
   }
-
-  qDebug() << left << top << right << bottom;
-
-  qDebug() << "Render Target: " << m_renderTarget->GetSize().width
-           << m_renderTarget->GetSize().height;
 
   D2D1_RECT_F destinationRect = D2D1::RectF(left, top, right, bottom);
 
@@ -149,6 +134,4 @@ void DXHelper::RenderBitmapOnWindow(ComPtr<ID2D1Bitmap> pBitmap) {
   m_renderTarget->EndDraw();
 
   winrt::check_hresult(m_swapChain->Present(1, 0));
-
-  return;
 }

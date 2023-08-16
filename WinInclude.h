@@ -10,6 +10,7 @@
 #include <mfreadwrite.h>
 #include <propvarutil.h>
 
+#include <mutex>
 #include <vector>
 #include <memory>
 

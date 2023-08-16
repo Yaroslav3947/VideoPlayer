@@ -35,17 +35,15 @@ MainWindow::MainWindow(QWidget *parent)
 
   connectSignalsAndSlots();
 
-  
-  //hideUI();
+  hideUI();
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event) {
   QMainWindow::resizeEvent(event);
 
-  m_videoPlayer->GetDxHelper()->ChangeSize(renderWidget->width(),
-                                           renderWidget->height());
-
-  qDebug() << renderWidget->width() << renderWidget->height();
+  UINT32 newWidth = renderWidget->width();
+  UINT32 newHeight = renderWidget->height();
+  m_videoPlayer->GetDxHelper()->ResizeRenderTarget(newWidth, newHeight);
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
@@ -82,7 +80,7 @@ void MainWindow::setupUI() {
   ui->slider->show();
   ui->playButton->show();
   ui->soundButton->show();
-  ui->volumeSlider->show();
+  //ui->volumeSlider->show();
   ui->currentContentDuration->show();
 
   ui->volumeSlider->setRange(0, maxVolumeSliderValue);
