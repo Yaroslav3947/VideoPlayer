@@ -1,14 +1,11 @@
 #pragma once
 
 #include <QEvent>
-#include <QTimer>
 #include <QMenuBar>
 #include <QKeyEvent>
 #include <QVBoxLayout>
-#include <QMouseEvent>
 #include <QFileDialog>
 #include <QtWidgets/QMainWindow>
-
 
 #include "DX/DXHelper.h"
 #include "VideoPlayer.h"

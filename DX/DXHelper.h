@@ -4,10 +4,10 @@
 
 class DXHelper {
  public:
-  DXHelper(HWND& hwnd);
+  DXHelper(const DXGI_SWAP_CHAIN_DESC& swapChainDesc);
   ~DXHelper() = default;
 
-  void Init(HWND& hwnd);
+  void Init();
 
   void RenderBitmapOnWindow(ComPtr<ID2D1Bitmap> pBitmap);
   ComPtr<ID2D1Bitmap> CreateBitmapFromVideoSample(IMFSample* pSample,
@@ -18,7 +18,7 @@ class DXHelper {
   std::mutex& GetResizeMtx() { return m_resize_mtx; }
 
  private:
-  HWND m_hwnd;
+  DXGI_SWAP_CHAIN_DESC m_swapChainDesc;
 
   std::mutex m_resize_mtx;
 

@@ -1,24 +1,11 @@
 #include "DXHelper.h"
 
-DXHelper::DXHelper(HWND& hwnd) : m_hwnd(hwnd) { Init(hwnd); }
+DXHelper::DXHelper(const DXGI_SWAP_CHAIN_DESC& swapChainDesc)
+    : m_swapChainDesc(swapChainDesc) {
+  Init();
+}
 
-void DXHelper::Init(HWND& hwnd) {
-  DXGI_SWAP_CHAIN_DESC desc = {};
-  desc.BufferDesc.Width = 1920;
-  desc.BufferDesc.Height = 1080;
-  desc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-  desc.BufferDesc.RefreshRate.Numerator = 0;
-  desc.BufferDesc.RefreshRate.Denominator = 0;
-  desc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-  desc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-  desc.SampleDesc.Count = 1;
-  desc.SampleDesc.Quality = 0;
-  desc.BufferUsage = DXGI_USAGE_BACK_BUFFER | DXGI_USAGE_RENDER_TARGET_OUTPUT;
-  desc.BufferCount = 2;
-  desc.OutputWindow = hwnd;
-  desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
-  desc.Windowed = true;
-
+void DXHelper::Init() {
   D3D_FEATURE_LEVEL levels[] = {D3D_FEATURE_LEVEL_9_1,  D3D_FEATURE_LEVEL_9_2,
                                 D3D_FEATURE_LEVEL_9_3,  D3D_FEATURE_LEVEL_10_0,
                                 D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_11_0,
@@ -30,7 +17,7 @@ void DXHelper::Init(HWND& hwnd) {
 
   winrt::check_hresult(D3D11CreateDeviceAndSwapChain(
       nullptr, D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_HARDWARE, nullptr, deviceFlags,
-      levels, ARRAYSIZE(levels), D3D11_SDK_VERSION, &desc,
+      levels, ARRAYSIZE(levels), D3D11_SDK_VERSION, &m_swapChainDesc,
       m_swapChain.GetAddressOf(), m_device.GetAddressOf(), &m_featureLevel,
       m_deviceContext.GetAddressOf()));
 

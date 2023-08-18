@@ -1,5 +1,4 @@
 #include "VideoPlayer.h"
-#include <iostream>
 
 VideoPlayer::VideoPlayer(HWND &hwnd)
     : m_hwnd(hwnd),
@@ -47,7 +46,23 @@ ULONG VideoPlayer::Release() {
 void VideoPlayer::Init() {
   winrt::check_hresult(MFStartup(MF_VERSION));
 
-  m_dxhelper = std::make_unique<DXHelper>(m_hwnd);
+  DXGI_SWAP_CHAIN_DESC desc = {};
+  desc.BufferDesc.Width = 1920;
+  desc.BufferDesc.Height = 1080;
+  desc.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+  desc.BufferDesc.RefreshRate.Numerator = 0;
+  desc.BufferDesc.RefreshRate.Denominator = 0;
+  desc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+  desc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+  desc.SampleDesc.Count = 1;
+  desc.SampleDesc.Quality = 0;
+  desc.BufferUsage = DXGI_USAGE_BACK_BUFFER | DXGI_USAGE_RENDER_TARGET_OUTPUT;
+  desc.BufferCount = 2;
+  desc.OutputWindow = m_hwnd;
+  desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+  desc.Windowed = true;
+
+  m_dxhelper = std::make_unique<DXHelper>(desc);
   m_mediaReader = std::make_unique<MediaReader>();
   m_soundEffect = std::make_unique<SoundEffect>();
   m_audio = std::make_unique<Audio>();
@@ -144,6 +159,7 @@ LONGLONG VideoPlayer::GetDuration() {
   return duration;
 }
 
+
 void VideoPlayer::SetPosition(const LONGLONG &hnsNewPosition) {
   if (!m_reader) return;
   
@@ -188,6 +204,10 @@ float VideoPlayer::GetFPS() {
 
   return 0.0f;
 }
+
+
+    
+    
 
 HRESULT VideoPlayer::OnReadSample(HRESULT hr, DWORD dwStreamIndex,
                                   DWORD dwStreamFlags, LONGLONG llTimestamp,
